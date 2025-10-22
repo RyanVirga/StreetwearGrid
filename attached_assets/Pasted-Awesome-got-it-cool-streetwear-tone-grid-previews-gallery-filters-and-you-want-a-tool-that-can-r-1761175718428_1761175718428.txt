@@ -1,0 +1,188 @@
+Awesome—got it: cool streetwear tone, grid previews, gallery filters, and you want a tool that can reuse uploaded logos and pull style from moodboards to produce clean, trendy designs.
+
+Here’s the plan and your copy-pasteable Lovable prompt.
+
+⸻
+
+Recommendation for mockup & concept generation (Phase 2)
+
+Use a two-part workflow: Adobe Firefly (via Adobe Express API) + Smartmockups (or Placeit)
+	•	Why Firefly?
+	•	It supports Brand Kit concepts and handles vector/text/logo overlays well, so you can feed it the client’s logo, color hints from the moodboard, and get on-brand compositions (poster/graphic layouts, print placements) rather than just “artsy” AI.
+	•	Style Reference prompts let you steer toward clean, modern streetwear (big type, minimal gradients, grain/noise textures).
+	•	Adobe’s commercial safety/IP guardrails are stronger than most, which matters when you’re remixing client logos.
+	•	Why Smartmockups/Placeit?
+	•	They provide photoreal product mockups at scale (tees, hoodies, hats, totes, mugs, bottles) with API/automation options. You drop in Firefly’s design output (PNG/SVG), and instantly get store-ready product photos from multiple angles.
+	•	It’s fast, consistent, and easy to batch.
+
+Flow:
+Uploads (logo + moodboard) → Firefly generates 3–6 concept panels (internal only) → Pick 1–2 → Auto-place on blank apparel canvases → Smartmockups renders front/back/alt views.
+This gives you trendy concept ideation + realistic product mockups without exposing half-baked art to the client.
+
+⸻
+
+Lovable prompt (paste this in)
+
+Project: Streetwear-leaning custom merch request app (US-only)
+Audience: Businesses and creators; no anonymous requests
+Tone/Style: Cool streetwear, bold type, lots of negative space, editorial grid, big product imagery, minimal color palette (no purple)
+
+Build a mobile-first retail app for custom merch leads. Customers choose products, upload logos/moodboards, specify quantity and deadline, and submit a request. We capture contact info and route the lead by priority. No pricing calculator in v1—quotes go by email.
+
+Goals
+	•	Collect all production inputs in one pass (product, quantity, due date, artwork).
+	•	Display product cards and a gallery of past work.
+	•	Score and email leads to the team (Phase 1).
+	•	Prepare hooks for Phase 2 (pricing, payment, automated mockups).
+
+Pages & sections
+	1.	Home / Hero
+	•	Headline: “Custom streetwear, on your timeline.”
+	•	Subcopy: “Tell us what you need, drop your art, and we’ll craft a clean, on-brand look.”
+	•	CTAs: “Start a request” (primary), “See past work” (secondary)
+	•	Trust: turnaround badges (Standard, Rush), review count, client logos.
+	2.	Request Wizard (4 steps, sticky progress)
+	•	Step 1: Basics
+	•	Product multi-select (tee, collared shirt, hoodie, crewneck, hat, tote, bottle, mug, stickers)
+	•	Quantity (supports per-size table toggle), MOQ: 50
+	•	Due date (date picker), rush tiers available
+	•	Location (ZIP)
+	•	Priority selector (radio): Budget, Timeline, Quantity, Repeat customer, Product type, Location
+	•	Step 2: Customization
+	•	Print methods: screen print, DTG, puffy, embroidery, DTF, sublimation, engraving, patches
+	•	Print locations (front, back, sleeve, left chest)
+	•	Colorways and size runs
+	•	Notes field
+	•	Step 3: Uploads & Moodboard
+	•	Multi-file uploader with grid previews (JPG, PNG, PDF, plus vector like AI/SVG/EPS; no size cap UI constraint)
+	•	Optional Brand Guide upload (fonts, Pantone/hex, logo pack)
+	•	Optional links: Pinterest/Drive/Dropbox
+	•	Inline tips for best results (transparent PNG/SVG preferred)
+	•	Step 4: Contact & Review
+	•	Required: name, company, email, phone
+	•	Shipping ZIP
+	•	Summary of selections; acknowledge MOQ and rush notes
+	•	Submit CTA: “Send my request”
+	3.	Catalog
+	•	Product grid with filters: product type, print method, color, timeline, MOQ.
+	•	Card shows big image, short specs, typical turnaround, “Add to request”
+	4.	Gallery / Past Work
+	•	Grid with filters (product type, print method, color tags)
+	•	Case study modal: photos, brief blurb, method, turnaround.
+	5.	Thank You / Next Steps
+	•	Confirmation, email ETA, ability to add more files post-submit (link), reiterate MOQ and rush options.
+
+Lead routing & scoring (Phase 1)
+	•	Inputs: priority choice, deadline, quantity, repeat customer flag, product type, location
+	•	Scoring example: Budget +6, Timeline +5, Quantity (≥100) +4, Repeat +4, within-state +2; impossible deadline −6
+	•	Tag: Hot/Warm/Cold
+	•	Action: email all request data + attachments to a team inbox (Gmail/Outlook). No CRM yet.
+
+Accessibility & UX
+	•	Clear labels, inline errors, 44px tap targets, alt text prompts, keyboard-navigable.
+	•	Drag-drop uploads with progress and removal.
+	•	Sticky stepper with step names.
+
+Visual design
+	•	Typeface: Inter (display weights) with Source Sans 3 for body
+	•	No purple; use a neutral core with bold accent.
+	•	Suggested palette:
+	•	Base: Charcoal #111315, Off-white #FAFAF7
+	•	Accents: Electric Blue #2F6BFF or Safety Red #E63946 (choose one), Asphalt Gray #4B4F52
+	•	Photo style: studio-lit apparel on textured concrete or paper backdrops; subtle grain.
+
+Tech hooks (for later)
+	•	Prepare end-points for: pricing calculator, payment capture, and automated mockup generation (Adobe Firefly + Smartmockups).
+	•	Store uploads with metadata (filetype, brand kit present, colors extracted).
+
+Empty states & guardrails
+	•	If due date < 3 days, show: “Rush required, fees apply.”
+	•	If quantity < 50, show explainers and upsell to sample pack.
+
+⸻
+
+Production recommendations (Phase 1 MVP)
+
+Stack
+	•	Next.js (App Router) + TypeScript for the app
+	•	Supabase for auth (email OTP), Postgres (requests, files meta), RLS for per-user files
+	•	Supabase Storage (or S3) for uploads; virus scan via webhook (ClamAV/Lambda)
+	•	Resend or SendGrid for emailing lead packets to your team inbox (with attachments)
+	•	PostHog for funnel analytics (upload success, step drop-offs)
+	•	Vercel for hosting; set 10–50MB body limit for file uploads, chunked uploads
+
+Data model (minimal)
+	•	requests: id, user_id, company, contact, email, phone, zip, priority_choice, due_date, product_types[], methods[], size_run_json, quantity_total, notes, repeat_customer, location_state, score, tag, created_at
+	•	files: id, request_id, type (logo|art|moodboard|brand_guide), path, mime, width/height, colors_json, created_at
+	•	gallery_items: id, title, product_type, method, tags[], images[]
+
+Lead email
+	•	Compose an HTML email with a clean spec table and embedded thumbnails; attach originals. Subject: NEW REQUEST · {Company} · {Product} · {Qty} · {DueDate}
+
+Form details
+	•	Grid preview for uploads with remove/reorder
+	•	Vector badge (AI/SVG/EPS) and “Brand Guide attached” indicator
+	•	Per-size quantity table (S–XXL) with dynamic total
+	•	Friendly inline validations (ZIP, phone)
+
+Security & privacy
+	•	RLS: users can only read files they uploaded
+	•	Signed URLs for attachments in emails (expire in 7–14 days)
+	•	Rate-limit submits; honeypot field to deter bots
+
+SEO/content
+	•	Landing page with clear H1, product schema for Catalog cards, alt text on gallery images
+	•	FAQ: turnarounds, methods explained, MOQ policy
+
+Analytics KPIs
+	•	Start → Submit conversion
+	•	Upload success rate
+	•	Percent flagged as Rush
+	•	Distribution by method/product
+
+⸻
+
+Ready-to-use scoring & schema snippets (you can give these to dev)
+
+Lead scoring (example)
+
+{
+  "weights": {
+    "priority_budget": 6,
+    "priority_timeline": 5,
+    "quantity_100_plus": 4,
+    "repeat_customer": 4,
+    "in_state": 2,
+    "impossible_deadline": -6
+  },
+  "tags": { "hot": 12, "warm": 6 }
+}
+
+Request payload (simplified)
+
+{
+  "company": "Acme Co.",
+  "contact": "Jordan Lee",
+  "email": "jordan@acme.com",
+  "phone": "+1-555-123-4567",
+  "zip": "94110",
+  "priority": "Budget",
+  "products": ["tee","hoodie"],
+  "methods": ["screen_print","puffy"],
+  "quantity_total": 150,
+  "size_run": { "S": 20, "M": 40, "L": 50, "XL": 30, "XXL": 10 },
+  "due_date": "2025-11-15",
+  "colorways": ["black","sand"],
+  "locations": ["front","back"],
+  "notes": "Streetwear vibe, big type, minimal graphic.",
+  "repeat_customer": false,
+  "files": [
+    {"type":"logo","path":"/uploads/acme-logo.svg"},
+    {"type":"moodboard","path":"/uploads/mood1.jpg"}
+  ]
+}
+
+
+⸻
+
+If you want, I can turn this into a Figma-ready form spec and a Supabase schema SQL in the next message.
