@@ -2,9 +2,13 @@ import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Mail, Upload } from "lucide-react";
 
 export default function ThankYou() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestId = urlParams.get('id');
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -18,6 +22,14 @@ export default function ThankYou() {
           <p className="text-lg font-body text-muted-foreground max-w-2xl mx-auto">
             Thanks for submitting your custom merch request. We're reviewing your details and will get back to you shortly.
           </p>
+          {requestId && (
+            <div className="mt-4">
+              <p className="text-sm font-body text-muted-foreground mb-2">Your request ID:</p>
+              <Badge variant="secondary" className="text-sm" data-testid="badge-request-id">
+                {requestId}
+              </Badge>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -45,7 +57,7 @@ export default function ThankYou() {
                 <p className="text-sm font-body text-muted-foreground mb-3">
                   Forgot to upload something? You can add more files anytime.
                 </p>
-                <Link href="/request" data-testid="link-upload-more">
+                <Link href={requestId ? `/upload-files/${requestId}` : "/request"} data-testid="link-upload-more">
                   <Button variant="outline" size="sm" data-testid="button-upload-more">
                     Upload More Files
                   </Button>

@@ -8,6 +8,7 @@ import Catalog from "@/pages/Catalog";
 import Gallery from "@/pages/Gallery";
 import RequestWizard from "@/pages/RequestWizard";
 import ThankYou from "@/pages/ThankYou";
+import UploadFiles from "@/pages/UploadFiles";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/gallery" component={Gallery} />
       <Route path="/request" component={RequestWizard} />
       <Route path="/thank-you" component={ThankYou} />
+      <Route path="/upload-files/:id" component={UploadFiles} />
       <Route component={NotFound} />
     </Switch>
   );

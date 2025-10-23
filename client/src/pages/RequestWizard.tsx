@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import WizardProgress from "@/components/WizardProgress";
 import FileUploadZone from "@/components/FileUploadZone";
@@ -28,6 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarIcon, AlertCircle, Check, Plus, X } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
+import type { InsertMerchRequest, MerchRequest } from "@shared/schema";
 
 import screenPrintImage from "@assets/generated_images/Screen_print_example_closeup_9db12067.png";
 import dtgImage from "@assets/generated_images/DTG_print_example_closeup_be25af20.png";
@@ -36,8 +40,10 @@ import dtfImage from "@assets/generated_images/DTF_print_example_closeup_d4ef97b
 
 export default function RequestWizard() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [zipCode, setZipCode] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
   const [quantity, setQuantity] = useState(50);
   const [budget, setBudget] = useState("");
@@ -45,6 +51,12 @@ export default function RequestWizard() {
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [customColors, setCustomColors] = useState<Array<{ id: string; label: string; hex: string }>>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ id: string; name: string; type: string; size: number; preview?: string }>>([]);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [company, setCompany] = useState("");
+  const [message, setMessage] = useState("");
   const [customColorDialogOpen, setCustomColorDialogOpen] = useState(false);
   const [customColorInput, setCustomColorInput] = useState("#000000");
   const [customColorLabel, setCustomColorLabel] = useState("");
@@ -159,13 +171,69 @@ export default function RequestWizard() {
     setSelectedColors(selectedColors.filter(c => c !== colorId));
   };
 
+  const createRequestMutation = useMutation({
+    mutationFn: async (requestData: InsertMerchRequest) => {
+      const response = await apiRequest("POST", "/api/requests", requestData);
+      const data = await response.json();
+      return data as MerchRequest;
+    },
+    onSuccess: (data: MerchRequest) => {
+      toast({
+        title: "Request Submitted!",
+        description: "Your merch request has been received. We'll be in touch soon.",
+      });
+      setLocation(`/thank-you?id=${data.id}`);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit request. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleNext = () => {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
       console.log('Next step:', currentStep + 1);
     } else {
-      console.log('Submit request');
-      setLocation('/thank-you');
+      const productQuantities = selectedProducts.map(productId => {
+        const product = products.find(p => p.id === productId);
+        return {
+          id: productId,
+          name: product?.label || productId,
+          quantity: quantity,
+        };
+      });
+
+      const allColors = [
+        ...selectedColors.filter(id => !id.startsWith('custom-')),
+        ...customColors.filter(c => selectedColors.includes(c.id)).map(c => c.id)
+      ];
+
+      const customColorData = customColors
+        .filter(c => selectedColors.includes(c.id))
+        .map(c => ({ name: c.label, hex: c.hex }));
+
+      const requestData: InsertMerchRequest = {
+        zipCode: zipCode || "00000",
+        deadline: dueDate ? format(dueDate, 'yyyy-MM-dd') : undefined,
+        budget: budget || undefined,
+        products: productQuantities,
+        colorways: allColors.length > 0 ? allColors : undefined,
+        customColors: customColorData.length > 0 ? customColorData : undefined,
+        printMethod: selectedMethods.length > 0 ? selectedMethods[0] : undefined,
+        printLocations: selectedLocations.length > 0 ? selectedLocations : undefined,
+        files: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+        contactName: contactName,
+        contactEmail: contactEmail,
+        contactPhone: contactPhone || undefined,
+        company: company || undefined,
+        message: message || undefined,
+      };
+
+      createRequestMutation.mutate(requestData);
     }
   };
 
@@ -290,6 +358,8 @@ export default function RequestWizard() {
                     id="zip"
                     type="text"
                     placeholder="94110"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)}
                     className="mt-2"
                     data-testid="input-zip"
                   />
@@ -574,6 +644,8 @@ export default function RequestWizard() {
                   <Textarea
                     id="notes"
                     placeholder="Streetwear vibe, big type, minimal graphic..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     className="mt-2 min-h-32"
                     data-testid="textarea-notes"
                   />
@@ -591,7 +663,7 @@ export default function RequestWizard() {
                 </p>
               </div>
 
-              <FileUploadZone />
+              <FileUploadZone onFilesChange={setUploadedFiles} />
 
               <div>
                 <Label htmlFor="links" className="text-base">
@@ -627,6 +699,8 @@ export default function RequestWizard() {
                     <Input
                       id="name"
                       type="text"
+                      value={contactName}
+                      onChange={(e) => setContactName(e.target.value)}
                       className="mt-2"
                       data-testid="input-name"
                     />
@@ -636,6 +710,8 @@ export default function RequestWizard() {
                     <Input
                       id="company"
                       type="text"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
                       className="mt-2"
                       data-testid="input-company"
                     />
@@ -648,6 +724,8 @@ export default function RequestWizard() {
                     <Input
                       id="email"
                       type="email"
+                      value={contactEmail}
+                      onChange={(e) => setContactEmail(e.target.value)}
                       className="mt-2"
                       data-testid="input-email"
                     />
@@ -657,6 +735,8 @@ export default function RequestWizard() {
                     <Input
                       id="phone"
                       type="tel"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
                       className="mt-2"
                       data-testid="input-phone"
                     />
@@ -699,9 +779,10 @@ export default function RequestWizard() {
             </Button>
             <Button
               onClick={handleNext}
+              disabled={createRequestMutation.isPending}
               data-testid="button-next"
             >
-              {currentStep === 4 ? 'Send My Request' : 'Next Step'}
+              {createRequestMutation.isPending ? 'Sending...' : currentStep === 4 ? 'Send My Request' : 'Next Step'}
             </Button>
           </div>
         </Card>
