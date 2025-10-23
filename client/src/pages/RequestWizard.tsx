@@ -43,6 +43,7 @@ export default function RequestWizard() {
   const [budget, setBudget] = useState("");
   const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [customColors, setCustomColors] = useState<Array<{ id: string; label: string; hex: string }>>([]);
   const [customColorDialogOpen, setCustomColorDialogOpen] = useState(false);
   const [customColorInput, setCustomColorInput] = useState("#000000");
@@ -544,17 +545,27 @@ export default function RequestWizard() {
                 <div>
                   <Label className="text-base mb-3 block">Print Locations</Label>
                   <div className="flex flex-wrap gap-3">
-                    {['Front', 'Back', 'Left Chest', 'Sleeve'].map((location) => (
-                      <Badge
-                        key={location}
-                        variant="outline"
-                        className="px-4 py-2 cursor-pointer hover-elevate"
-                        onClick={() => console.log('Location:', location)}
-                        data-testid={`badge-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        {location}
-                      </Badge>
-                    ))}
+                    {['Front', 'Back', 'Left Chest', 'Sleeve'].map((location) => {
+                      const isSelected = selectedLocations.includes(location);
+                      return (
+                        <Badge
+                          key={location}
+                          variant={isSelected ? "default" : "outline"}
+                          className="px-4 py-2 cursor-pointer hover-elevate"
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedLocations(selectedLocations.filter(l => l !== location));
+                            } else {
+                              setSelectedLocations([...selectedLocations, location]);
+                            }
+                            console.log('Location:', location);
+                          }}
+                          data-testid={`badge-location-${location.toLowerCase().replace(/\s+/g, '-')}`}
+                        >
+                          {location}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
 
