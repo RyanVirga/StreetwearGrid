@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Upload, X, FileImage, FileText } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,7 @@ interface FileUploadZoneProps {
 export default function FileUploadZone({ onFilesChange }: FileUploadZoneProps) {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -29,23 +30,55 @@ export default function FileUploadZone({ onFilesChange }: FileUploadZoneProps) {
     setIsDragging(false);
   };
 
+  const processFiles = (fileList: FileList) => {
+    const newFiles: UploadedFile[] = [];
+    
+    Array.from(fileList).forEach((file) => {
+      const uploadedFile: UploadedFile = {
+        id: `${Date.now()}-${Math.random()}`,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      };
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          uploadedFile.preview = e.target?.result as string;
+          setFiles(prev => prev.map(f => 
+            f.id === uploadedFile.id ? { ...f, preview: uploadedFile.preview } : f
+          ));
+        };
+        reader.readAsDataURL(file);
+      }
+
+      newFiles.push(uploadedFile);
+    });
+
+    const updatedFiles = [...files, ...newFiles];
+    setFiles(updatedFiles);
+    onFilesChange?.(updatedFiles);
+    console.log('Files added:', newFiles.length);
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    console.log('Files dropped');
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFiles(e.dataTransfer.files);
+    }
   };
 
-  const addMockFile = () => {
-    const newFile: UploadedFile = {
-      id: Date.now().toString(),
-      name: 'logo-design.svg',
-      type: 'image/svg+xml',
-      size: 45600,
-    };
-    const updatedFiles = [...files, newFile];
-    setFiles(updatedFiles);
-    onFilesChange?.(updatedFiles);
-    console.log('Mock file added');
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFiles(e.target.files);
+      e.target.value = '';
+    }
+  };
+
+  const handleChooseFiles = () => {
+    fileInputRef.current?.click();
   };
 
   const removeFile = (id: string) => {
@@ -61,6 +94,15 @@ export default function FileUploadZone({ onFilesChange }: FileUploadZoneProps) {
 
   return (
     <div className="space-y-4">
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/*,.pdf,.svg,.ai,.eps"
+        onChange={handleFileInputChange}
+        className="hidden"
+        data-testid="input-file-hidden"
+      />
       <div
         className={`border-2 border-dashed rounded-md p-8 text-center transition-colors ${
           isDragging ? 'border-primary bg-primary/5' : 'border-border'
@@ -75,7 +117,7 @@ export default function FileUploadZone({ onFilesChange }: FileUploadZoneProps) {
         <p className="text-sm font-body text-muted-foreground mb-4">
           Supports JPG, PNG, PDF, SVG, AI, EPS
         </p>
-        <Button onClick={addMockFile} data-testid="button-upload">
+        <Button onClick={handleChooseFiles} data-testid="button-upload">
           Choose Files
         </Button>
         <p className="text-xs font-body text-muted-foreground mt-4">
@@ -95,8 +137,10 @@ export default function FileUploadZone({ onFilesChange }: FileUploadZoneProps) {
                 <X className="h-3 w-3" />
               </button>
               
-              <div className="aspect-square bg-muted rounded-md mb-2 flex items-center justify-center">
-                {isVector(file.type) ? (
+              <div className="aspect-square bg-muted rounded-md mb-2 flex items-center justify-center overflow-hidden">
+                {file.preview ? (
+                  <img src={file.preview} alt={file.name} className="w-full h-full object-cover" />
+                ) : isVector(file.type) ? (
                   <FileText className="h-8 w-8 text-muted-foreground" />
                 ) : (
                   <FileImage className="h-8 w-8 text-muted-foreground" />
