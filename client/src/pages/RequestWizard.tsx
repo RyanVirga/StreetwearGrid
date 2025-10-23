@@ -411,7 +411,8 @@ export default function RequestWizard() {
                               e.stopPropagation();
                               removeCustomColor(color.id);
                             }}
-                            className="absolute -top-1 -right-1 z-10 bg-destructive text-destructive-foreground rounded-full p-1.5 shadow-md hover-elevate"
+                            style={{ top: '-4px', right: '-4px' }}
+                            className="absolute z-10 bg-destructive text-destructive-foreground rounded-full p-1.5 shadow-md hover-elevate"
                             data-testid={`button-remove-${color.id}`}
                           >
                             <X className="h-3 w-3" />
