@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
-import Hero from "@/components/Hero";
 import ProductCard from "@/components/ProductCard";
 import FilterBar from "@/components/FilterBar";
+import HorizontalScrollSection from "@/components/HorizontalScrollSection";
+import ProductShowcase from "@/components/ProductShowcase";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { 
@@ -22,6 +23,37 @@ import toteImage from "@assets/generated_images/Beige_tote_bag_flat_lay_92c6a31f
 
 export default function Home() {
   const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; category: string }>>([]);
+
+  const showcaseProducts = [
+    {
+      name: "Premium T-Shirt",
+      price: "59.00",
+      image: teeImage,
+      type: "tshirt" as const,
+      modelColor: "#F5F5DC",
+    },
+    {
+      name: "Heavyweight Hoodie",
+      price: "89.00",
+      image: hoodieImage,
+      type: "hoodie" as const,
+      modelColor: "#1E3A5F",
+    },
+    {
+      name: "Baseball Cap",
+      price: "28.00",
+      image: capImage,
+      type: "cap" as const,
+      modelColor: "#90C9A8",
+    },
+    {
+      name: "Canvas Tote",
+      price: "49.00",
+      image: toteImage,
+      type: "tote" as const,
+      modelColor: "#F5F5DC",
+    },
+  ];
 
   const featuredProducts = [
     {
@@ -95,7 +127,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <Hero />
+      
+      <HorizontalScrollSection>
+        {showcaseProducts.map((product, index) => (
+          <ProductShowcase
+            key={index}
+            {...product}
+          />
+        ))}
+      </HorizontalScrollSection>
       
       <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
