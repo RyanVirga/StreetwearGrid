@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import type { Mesh, Group } from "three";
@@ -82,9 +82,38 @@ function RotatingProduct({ type = "tshirt", color = "#2F6BFF" }: Product3DModelP
 }
 
 export default function Product3DModel({ type, color }: Product3DModelProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      console.warn("WebGL context lost, attempting recovery...");
+    };
+
+    const handleContextRestored = () => {
+      console.log("WebGL context restored");
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+    canvas.addEventListener("webglcontextrestored", handleContextRestored);
+
+    return () => {
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
+      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
+    };
+  }, []);
+
   return (
     <div className="w-full h-full">
-      <Canvas>
+      <Canvas
+        ref={canvasRef}
+        gl={{ preserveDrawingBuffer: false, antialias: false }}
+        dpr={[1, 1.5]}
+        performance={{ min: 0.5 }}
+      >
         <PerspectiveCamera makeDefault position={[0, 0, 5]} />
         <RotatingProduct type={type} color={color} />
         <OrbitControls enableZoom={false} enablePan={false} />

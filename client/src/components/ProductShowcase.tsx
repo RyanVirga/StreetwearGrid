@@ -19,7 +19,8 @@ export default function ProductShowcase({
   modelColor = "#2F6BFF",
 }: ProductShowcaseProps) {
   return (
-    <div className="relative w-screen h-screen flex-shrink-0 flex items-center justify-center">
+    <div className="w-screen h-screen flex-shrink-0">
+      <div className="relative w-full h-full flex items-center justify-center">
       <DiagonalStripedBackground />
       
       <div className="relative z-10 w-full h-full flex items-center justify-center px-4 sm:px-12 lg:px-20">
@@ -112,6 +113,7 @@ export default function ProductShowcase({
         <Button variant="outline" size="default" data-testid={`button-quick-view-${name.toLowerCase().replace(/\s+/g, '-')}`}>
           QUICK VIEW
         </Button>
+      </div>
       </div>
     </div>
   );
