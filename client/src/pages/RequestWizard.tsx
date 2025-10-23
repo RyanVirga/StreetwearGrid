@@ -26,7 +26,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CalendarIcon, AlertCircle, Check, Plus, X } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
 
@@ -430,7 +429,7 @@ export default function RequestWizard() {
                           <Plus className="h-6 w-6 text-muted-foreground" />
                         </button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
+                      <DialogContent className="sm:max-w-lg">
                         <DialogHeader>
                           <DialogTitle>Add Custom Color</DialogTitle>
                         </DialogHeader>
@@ -447,101 +446,88 @@ export default function RequestWizard() {
                             />
                           </div>
 
-                          <Tabs defaultValue="picker" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                              <TabsTrigger value="picker" data-testid="tab-picker">Picker</TabsTrigger>
-                              <TabsTrigger value="hex" data-testid="tab-hex">Hex</TabsTrigger>
-                              <TabsTrigger value="rgb" data-testid="tab-rgb">RGB</TabsTrigger>
-                            </TabsList>
-                            
-                            <TabsContent value="picker" className="space-y-4">
-                              <div className="flex items-center gap-4">
+                          <div className="grid grid-cols-[1fr_auto] gap-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-3">
                                 <input
                                   type="color"
                                   value={customColorInput}
                                   onChange={(e) => handleHexChange(e.target.value)}
-                                  className="h-20 w-20 rounded-md cursor-pointer border-2 border-border"
+                                  className="h-32 w-full rounded-md cursor-pointer border-2 border-border"
                                   data-testid="input-color-picker"
                                 />
-                                <div className="flex-1">
-                                  <div className="text-sm font-body text-muted-foreground mb-1">
-                                    Selected Color
-                                  </div>
-                                  <div 
-                                    className="h-20 w-full rounded-md border-2 border-border"
-                                    style={{ backgroundColor: customColorInput }}
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="hex-input" className="text-sm mb-1 block">Hex</Label>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-muted-foreground">#</span>
+                                  <Input
+                                    id="hex-input"
+                                    type="text"
+                                    value={customColorInput.replace('#', '')}
+                                    onChange={(e) => {
+                                      let hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').substring(0, 6);
+                                      handleHexChange('#' + hex);
+                                    }}
+                                    placeholder="000000"
+                                    className="font-mono"
+                                    maxLength={6}
+                                    data-testid="input-hex"
                                   />
                                 </div>
                               </div>
-                            </TabsContent>
-                            
-                            <TabsContent value="hex" className="space-y-4">
-                              <div>
-                                <Label htmlFor="hex-input">Hex Code</Label>
-                                <Input
-                                  id="hex-input"
-                                  type="text"
-                                  value={customColorInput}
-                                  onChange={(e) => handleHexChange(e.target.value)}
-                                  placeholder="#000000"
-                                  className="mt-2 font-mono"
-                                  data-testid="input-hex"
+                            </div>
+
+                            <div className="flex flex-col gap-3">
+                              <div className="space-y-2">
+                                <div className="text-xs font-body text-muted-foreground mb-1">Preview</div>
+                                <div 
+                                  className="h-16 w-16 rounded-md border-2 border-border"
+                                  style={{ backgroundColor: customColorInput }}
                                 />
                               </div>
-                              <div 
-                                className="h-20 w-full rounded-md border-2 border-border"
-                                style={{ backgroundColor: customColorInput }}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <Label htmlFor="rgb-r" className="text-sm mb-1 block">R</Label>
+                              <Input
+                                id="rgb-r"
+                                type="number"
+                                min="0"
+                                max="255"
+                                value={rgbR}
+                                onChange={(e) => handleRgbChange(e.target.value, rgbG, rgbB)}
+                                data-testid="input-rgb-r"
                               />
-                            </TabsContent>
-                            
-                            <TabsContent value="rgb" className="space-y-4">
-                              <div className="grid grid-cols-3 gap-3">
-                                <div>
-                                  <Label htmlFor="rgb-r">R</Label>
-                                  <Input
-                                    id="rgb-r"
-                                    type="number"
-                                    min="0"
-                                    max="255"
-                                    value={rgbR}
-                                    onChange={(e) => handleRgbChange(e.target.value, rgbG, rgbB)}
-                                    className="mt-2"
-                                    data-testid="input-rgb-r"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="rgb-g">G</Label>
-                                  <Input
-                                    id="rgb-g"
-                                    type="number"
-                                    min="0"
-                                    max="255"
-                                    value={rgbG}
-                                    onChange={(e) => handleRgbChange(rgbR, e.target.value, rgbB)}
-                                    className="mt-2"
-                                    data-testid="input-rgb-g"
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="rgb-b">B</Label>
-                                  <Input
-                                    id="rgb-b"
-                                    type="number"
-                                    min="0"
-                                    max="255"
-                                    value={rgbB}
-                                    onChange={(e) => handleRgbChange(rgbR, rgbG, e.target.value)}
-                                    className="mt-2"
-                                    data-testid="input-rgb-b"
-                                  />
-                                </div>
-                              </div>
-                              <div 
-                                className="h-20 w-full rounded-md border-2 border-border"
-                                style={{ backgroundColor: customColorInput }}
+                            </div>
+                            <div>
+                              <Label htmlFor="rgb-g" className="text-sm mb-1 block">G</Label>
+                              <Input
+                                id="rgb-g"
+                                type="number"
+                                min="0"
+                                max="255"
+                                value={rgbG}
+                                onChange={(e) => handleRgbChange(rgbR, e.target.value, rgbB)}
+                                data-testid="input-rgb-g"
                               />
-                            </TabsContent>
-                          </Tabs>
+                            </div>
+                            <div>
+                              <Label htmlFor="rgb-b" className="text-sm mb-1 block">B</Label>
+                              <Input
+                                id="rgb-b"
+                                type="number"
+                                min="0"
+                                max="255"
+                                value={rgbB}
+                                onChange={(e) => handleRgbChange(rgbR, rgbG, e.target.value)}
+                                data-testid="input-rgb-b"
+                              />
+                            </div>
+                          </div>
 
                           <Button 
                             onClick={handleAddCustomColor}
