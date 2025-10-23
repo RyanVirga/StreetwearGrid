@@ -8,11 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CalendarIcon, AlertCircle } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
 
@@ -22,7 +28,7 @@ export default function RequestWizard() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [dueDate, setDueDate] = useState<Date>();
   const [quantity, setQuantity] = useState(50);
-  const [priority, setPriority] = useState("budget");
+  const [budget, setBudget] = useState("");
 
   const steps = [
     { number: 1, title: 'Basics', completed: currentStep > 1, current: currentStep === 1 },
@@ -186,40 +192,20 @@ export default function RequestWizard() {
                 </div>
 
                 <div>
-                  <Label className="text-base mb-3 block">What matters most? *</Label>
-                  <RadioGroup value={priority} onValueChange={setPriority}>
-                    <div className="space-y-3">
-                      {[
-                        { value: 'budget', label: 'Budget', description: 'Best price is priority' },
-                        { value: 'timeline', label: 'Timeline', description: 'Need it fast' },
-                        { value: 'quantity', label: 'Quantity', description: 'Large order flexibility' },
-                      ].map((option) => (
-                        <Card
-                          key={option.value}
-                          className={`p-4 cursor-pointer transition-all hover-elevate ${
-                            priority === option.value ? 'border-primary' : ''
-                          }`}
-                          onClick={() => {
-                            setPriority(option.value);
-                            console.log('Priority:', option.value);
-                          }}
-                          data-testid={`card-priority-${option.value}`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <RadioGroupItem value={option.value} id={option.value} className="mt-1" />
-                            <div>
-                              <Label htmlFor={option.value} className="font-medium cursor-pointer">
-                                {option.label}
-                              </Label>
-                              <p className="text-sm font-body text-muted-foreground mt-1">
-                                {option.description}
-                              </p>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  </RadioGroup>
+                  <Label className="text-base">Budget Range *</Label>
+                  <Select value={budget} onValueChange={setBudget}>
+                    <SelectTrigger className="mt-2" data-testid="select-budget">
+                      <SelectValue placeholder="Select your budget range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="under-500">Under $500</SelectItem>
+                      <SelectItem value="500-1000">$500 - $1,000</SelectItem>
+                      <SelectItem value="1000-2500">$1,000 - $2,500</SelectItem>
+                      <SelectItem value="2500-5000">$2,500 - $5,000</SelectItem>
+                      <SelectItem value="5000-10000">$5,000 - $10,000</SelectItem>
+                      <SelectItem value="over-10000">Over $10,000</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
@@ -381,8 +367,8 @@ export default function RequestWizard() {
                       <span>{dueDate ? format(dueDate, 'PPP') : 'Not set'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Priority:</span>
-                      <span className="capitalize">{priority}</span>
+                      <span className="text-muted-foreground">Budget:</span>
+                      <span>{budget ? budget.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') : 'Not set'}</span>
                     </div>
                   </div>
                 </Card>
