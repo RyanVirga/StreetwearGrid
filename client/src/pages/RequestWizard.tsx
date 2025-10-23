@@ -19,8 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, AlertCircle } from "lucide-react";
+import { CalendarIcon, AlertCircle, Check } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
+
+import screenPrintImage from "@assets/generated_images/Screen_print_example_closeup_9db12067.png";
+import dtgImage from "@assets/generated_images/DTG_print_example_closeup_be25af20.png";
+import embroideryImage from "@assets/generated_images/Embroidery_example_closeup_ee6959ef.png";
+import dtfImage from "@assets/generated_images/DTF_print_example_closeup_d4ef97b9.png";
 
 export default function RequestWizard() {
   const [, setLocation] = useLocation();
@@ -29,6 +34,8 @@ export default function RequestWizard() {
   const [dueDate, setDueDate] = useState<Date>();
   const [quantity, setQuantity] = useState(50);
   const [budget, setBudget] = useState("");
+  const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   const steps = [
     { number: 1, title: 'Basics', completed: currentStep > 1, current: currentStep === 1 },
@@ -46,10 +53,21 @@ export default function RequestWizard() {
   ];
 
   const printMethods = [
-    { id: 'screen', label: 'Screen Print' },
-    { id: 'dtg', label: 'DTG' },
-    { id: 'embroidery', label: 'Embroidery' },
-    { id: 'dtf', label: 'DTF' },
+    { id: 'screen', label: 'Screen Print', image: screenPrintImage, description: 'Bold, durable prints' },
+    { id: 'dtg', label: 'DTG', image: dtgImage, description: 'Full-color, detailed' },
+    { id: 'embroidery', label: 'Embroidery', image: embroideryImage, description: 'Premium stitched logos' },
+    { id: 'dtf', label: 'DTF', image: dtfImage, description: 'Vibrant transfers' },
+  ];
+
+  const colorways = [
+    { id: 'black', label: 'Black', hex: '#000000' },
+    { id: 'white', label: 'White', hex: '#FFFFFF' },
+    { id: 'navy', label: 'Navy', hex: '#1E3A8A' },
+    { id: 'gray', label: 'Gray', hex: '#6B7280' },
+    { id: 'red', label: 'Red', hex: '#DC2626' },
+    { id: 'green', label: 'Forest', hex: '#166534' },
+    { id: 'brown', label: 'Sand', hex: '#92400E' },
+    { id: 'blue', label: 'Sky', hex: '#0EA5E9' },
   ];
 
   const isRushOrder = dueDate && differenceInDays(dueDate, new Date()) < 3;
@@ -223,20 +241,96 @@ export default function RequestWizard() {
               <div className="space-y-4">
                 <div>
                   <Label className="text-base mb-3 block">Print Methods *</Label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {printMethods.map((method) => (
                       <Card
                         key={method.id}
-                        className="p-4 cursor-pointer transition-all hover-elevate"
-                        onClick={() => console.log('Method:', method.id)}
+                        className={`overflow-hidden cursor-pointer transition-all hover-elevate ${
+                          selectedMethods.includes(method.id) ? 'border-primary' : ''
+                        }`}
+                        onClick={() => {
+                          if (selectedMethods.includes(method.id)) {
+                            setSelectedMethods(selectedMethods.filter(m => m !== method.id));
+                          } else {
+                            setSelectedMethods([...selectedMethods, method.id]);
+                          }
+                          console.log('Method:', method.id);
+                        }}
                         data-testid={`card-method-${method.id}`}
                       >
-                        <div className="flex items-center gap-3">
-                          <Checkbox />
-                          <span className="font-medium">{method.label}</span>
+                        <div className="flex gap-4">
+                          <div className="w-24 h-24 flex-shrink-0 bg-muted overflow-hidden">
+                            <img 
+                              src={method.image} 
+                              alt={method.label}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 p-4 pl-0 flex items-center justify-between">
+                            <div>
+                              <div className="font-semibold mb-1">{method.label}</div>
+                              <p className="text-sm font-body text-muted-foreground">
+                                {method.description}
+                              </p>
+                            </div>
+                            <Checkbox 
+                              checked={selectedMethods.includes(method.id)}
+                              onCheckedChange={() => {}}
+                              className="flex-shrink-0"
+                            />
+                          </div>
                         </div>
                       </Card>
                     ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-base mb-3 block">Colorways *</Label>
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+                    {colorways.map((color) => (
+                      <button
+                        key={color.id}
+                        onClick={() => {
+                          if (selectedColors.includes(color.id)) {
+                            setSelectedColors(selectedColors.filter(c => c !== color.id));
+                          } else {
+                            setSelectedColors([...selectedColors, color.id]);
+                          }
+                          console.log('Color:', color.id);
+                        }}
+                        className={`relative aspect-square rounded-md border-2 transition-all hover-elevate ${
+                          selectedColors.includes(color.id) 
+                            ? 'border-primary ring-2 ring-primary ring-offset-2' 
+                            : 'border-border'
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                        data-testid={`button-color-${color.id}`}
+                        aria-label={color.label}
+                      >
+                        {selectedColors.includes(color.id) && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className={`rounded-full p-1 ${
+                              color.hex === '#FFFFFF' ? 'bg-black' : 'bg-white'
+                            }`}>
+                              <Check className={`h-3 w-3 ${
+                                color.hex === '#FFFFFF' ? 'text-white' : 'text-black'
+                              }`} />
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {selectedColors.map(colorId => {
+                      const color = colorways.find(c => c.id === colorId);
+                      return color ? (
+                        <Badge key={colorId} variant="secondary">
+                          {color.label}
+                        </Badge>
+                      ) : null;
+                    })}
                   </div>
                 </div>
 
