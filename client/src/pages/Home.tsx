@@ -50,13 +50,11 @@ export default function Home() {
                 Our most popular items for custom printing
               </p>
             </div>
-            <Link href="/catalog">
-              <a data-testid="link-view-catalog">
-                <Button variant="outline" className="hidden sm:flex gap-2">
-                  View Full Catalog
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </a>
+            <Link href="/catalog" data-testid="link-view-catalog">
+              <Button variant="outline" className="hidden sm:flex gap-2">
+                View Full Catalog
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
           </div>
 
@@ -71,13 +69,11 @@ export default function Home() {
           </div>
 
           <div className="mt-8 sm:hidden">
-            <Link href="/catalog">
-              <a data-testid="link-view-catalog-mobile">
-                <Button variant="outline" className="w-full gap-2">
-                  View Full Catalog
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </a>
+            <Link href="/catalog" data-testid="link-view-catalog-mobile">
+              <Button variant="outline" className="w-full gap-2">
+                View Full Catalog
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
           </div>
         </div>
@@ -92,12 +88,10 @@ export default function Home() {
             Upload your artwork, select your products, and we'll handle the rest. 
             Minimum order of 50 pieces.
           </p>
-          <Link href="/request">
-            <a data-testid="button-cta-request">
-              <Button size="lg">
-                Start Your Request
-              </Button>
-            </a>
+          <Link href="/request" data-testid="button-cta-request">
+            <Button size="lg">
+              Start Your Request
+            </Button>
           </Link>
         </div>
       </section>

@@ -87,12 +87,10 @@ export default function ThankYou() {
           <p className="font-body text-muted-foreground mb-4">
             Questions about your order?
           </p>
-          <Link href="/">
-            <a data-testid="link-back-home">
-              <Button variant="outline">
-                Back to Home
-              </Button>
-            </a>
+          <Link href="/" data-testid="link-back-home">
+            <Button variant="outline">
+              Back to Home
+            </Button>
           </Link>
         </div>
       </div>

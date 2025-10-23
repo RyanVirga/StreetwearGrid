@@ -27,23 +27,19 @@ export default function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Link href="/request">
-              <a data-testid="button-start-request">
-                <Button size="lg" className="w-full sm:w-auto">
-                  Start a Request
-                </Button>
-              </a>
+            <Link href="/request" data-testid="button-start-request">
+              <Button size="lg" className="w-full sm:w-auto">
+                Start a Request
+              </Button>
             </Link>
-            <Link href="/gallery">
-              <a data-testid="button-see-work">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="w-full sm:w-auto bg-background/40 backdrop-blur-sm"
-                >
-                  See Past Work
-                </Button>
-              </a>
+            <Link href="/gallery" data-testid="button-see-work">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="w-full sm:w-auto bg-background/40 backdrop-blur-sm"
+              >
+                See Past Work
+              </Button>
             </Link>
           </div>
 
