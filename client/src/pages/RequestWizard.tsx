@@ -446,45 +446,33 @@ export default function RequestWizard() {
                             />
                           </div>
 
-                          <div className="grid grid-cols-[1fr_auto] gap-4">
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="color"
-                                  value={customColorInput}
-                                  onChange={(e) => handleHexChange(e.target.value)}
-                                  className="h-32 w-full rounded-md cursor-pointer border-2 border-border"
-                                  data-testid="input-color-picker"
-                                />
-                              </div>
-                              
-                              <div>
-                                <Label htmlFor="hex-input" className="text-sm mb-1 block">Hex</Label>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-muted-foreground">#</span>
-                                  <Input
-                                    id="hex-input"
-                                    type="text"
-                                    value={customColorInput.replace('#', '')}
-                                    onChange={(e) => {
-                                      let hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').substring(0, 6);
-                                      handleHexChange('#' + hex);
-                                    }}
-                                    placeholder="000000"
-                                    className="font-mono"
-                                    maxLength={6}
-                                    data-testid="input-hex"
-                                  />
-                                </div>
-                              </div>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="color"
+                                value={customColorInput}
+                                onChange={(e) => handleHexChange(e.target.value)}
+                                className="h-32 w-full rounded-md cursor-pointer border-2 border-border"
+                                data-testid="input-color-picker"
+                              />
                             </div>
-
-                            <div className="flex flex-col gap-3">
-                              <div className="space-y-2">
-                                <div className="text-xs font-body text-muted-foreground mb-1">Preview</div>
-                                <div 
-                                  className="h-16 w-16 rounded-md border-2 border-border"
-                                  style={{ backgroundColor: customColorInput }}
+                            
+                            <div>
+                              <Label htmlFor="hex-input" className="text-sm mb-1 block">Hex</Label>
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">#</span>
+                                <Input
+                                  id="hex-input"
+                                  type="text"
+                                  value={customColorInput.replace('#', '')}
+                                  onChange={(e) => {
+                                    let hex = e.target.value.replace(/[^0-9A-Fa-f]/g, '').substring(0, 6);
+                                    handleHexChange('#' + hex);
+                                  }}
+                                  placeholder="000000"
+                                  className="font-mono"
+                                  maxLength={6}
+                                  data-testid="input-hex"
                                 />
                               </div>
                             </div>
