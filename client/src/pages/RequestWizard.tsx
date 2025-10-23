@@ -19,7 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, AlertCircle, Check } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarIcon, AlertCircle, Check, Plus, X } from "lucide-react";
 import { format, addDays, differenceInDays } from "date-fns";
 
 import screenPrintImage from "@assets/generated_images/Screen_print_example_closeup_9db12067.png";
@@ -36,6 +44,13 @@ export default function RequestWizard() {
   const [budget, setBudget] = useState("");
   const [selectedMethods, setSelectedMethods] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
+  const [customColors, setCustomColors] = useState<Array<{ id: string; label: string; hex: string }>>([]);
+  const [customColorDialogOpen, setCustomColorDialogOpen] = useState(false);
+  const [customColorInput, setCustomColorInput] = useState("#000000");
+  const [customColorLabel, setCustomColorLabel] = useState("");
+  const [rgbR, setRgbR] = useState("0");
+  const [rgbG, setRgbG] = useState("0");
+  const [rgbB, setRgbB] = useState("0");
 
   const steps = [
     { number: 1, title: 'Basics', completed: currentStep > 1, current: currentStep === 1 },
@@ -72,6 +87,77 @@ export default function RequestWizard() {
 
   const isRushOrder = dueDate && differenceInDays(dueDate, new Date()) < 3;
   const isBelowMOQ = quantity < 50;
+
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  };
+
+  const rgbToHex = (r: number, g: number, b: number) => {
+    return "#" + [r, g, b].map(x => {
+      const hex = x.toString(16);
+      return hex.length === 1 ? "0" + hex : hex;
+    }).join("");
+  };
+
+  const handleAddCustomColor = () => {
+    if (!customColorLabel.trim()) {
+      return;
+    }
+    
+    const newColor = {
+      id: `custom-${Date.now()}`,
+      label: customColorLabel,
+      hex: customColorInput
+    };
+    
+    setCustomColors([...customColors, newColor]);
+    setSelectedColors([...selectedColors, newColor.id]);
+    setCustomColorLabel("");
+    setCustomColorInput("#000000");
+    setRgbR("0");
+    setRgbG("0");
+    setRgbB("0");
+    setCustomColorDialogOpen(false);
+  };
+
+  const handleHexChange = (hex: string) => {
+    setCustomColorInput(hex);
+    const rgb = hexToRgb(hex);
+    if (rgb) {
+      setRgbR(rgb.r.toString());
+      setRgbG(rgb.g.toString());
+      setRgbB(rgb.b.toString());
+    }
+  };
+
+  const handleRgbChange = (r: string, g: string, b: string) => {
+    setRgbR(r);
+    setRgbG(g);
+    setRgbB(b);
+    
+    const rNum = parseInt(r) || 0;
+    const gNum = parseInt(g) || 0;
+    const bNum = parseInt(b) || 0;
+    
+    const hex = rgbToHex(
+      Math.min(255, Math.max(0, rNum)),
+      Math.min(255, Math.max(0, gNum)),
+      Math.min(255, Math.max(0, bNum))
+    );
+    setCustomColorInput(hex);
+  };
+
+  const allColors = [...colorways, ...customColors];
+
+  const removeCustomColor = (colorId: string) => {
+    setCustomColors(customColors.filter(c => c.id !== colorId));
+    setSelectedColors(selectedColors.filter(c => c !== colorId));
+  };
 
   const handleNext = () => {
     if (currentStep < 4) {
@@ -288,43 +374,190 @@ export default function RequestWizard() {
                 <div>
                   <Label className="text-base mb-3 block">Colorways *</Label>
                   <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
-                    {colorways.map((color) => (
-                      <button
-                        key={color.id}
-                        onClick={() => {
-                          if (selectedColors.includes(color.id)) {
-                            setSelectedColors(selectedColors.filter(c => c !== color.id));
-                          } else {
-                            setSelectedColors([...selectedColors, color.id]);
-                          }
-                          console.log('Color:', color.id);
-                        }}
-                        className={`relative aspect-square rounded-md border-2 transition-all hover-elevate ${
-                          selectedColors.includes(color.id) 
-                            ? 'border-primary ring-2 ring-primary ring-offset-2' 
-                            : 'border-border'
-                        }`}
-                        style={{ backgroundColor: color.hex }}
-                        data-testid={`button-color-${color.id}`}
-                        aria-label={color.label}
-                      >
-                        {selectedColors.includes(color.id) && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className={`rounded-full p-1 ${
-                              color.hex === '#FFFFFF' ? 'bg-black' : 'bg-white'
-                            }`}>
-                              <Check className={`h-3 w-3 ${
-                                color.hex === '#FFFFFF' ? 'text-white' : 'text-black'
-                              }`} />
+                    {allColors.map((color) => (
+                      <div key={color.id} className="relative">
+                        <button
+                          onClick={() => {
+                            if (selectedColors.includes(color.id)) {
+                              setSelectedColors(selectedColors.filter(c => c !== color.id));
+                            } else {
+                              setSelectedColors([...selectedColors, color.id]);
+                            }
+                            console.log('Color:', color.id);
+                          }}
+                          className={`relative aspect-square w-full rounded-md border-2 transition-all hover-elevate ${
+                            selectedColors.includes(color.id) 
+                              ? 'border-primary ring-2 ring-primary ring-offset-2' 
+                              : 'border-border'
+                          }`}
+                          style={{ backgroundColor: color.hex }}
+                          data-testid={`button-color-${color.id}`}
+                          aria-label={color.label}
+                        >
+                          {selectedColors.includes(color.id) && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className={`rounded-full p-1 ${
+                                color.hex === '#FFFFFF' ? 'bg-black' : 'bg-white'
+                              }`}>
+                                <Check className={`h-3 w-3 ${
+                                  color.hex === '#FFFFFF' ? 'text-white' : 'text-black'
+                                }`} />
+                              </div>
                             </div>
-                          </div>
+                          )}
+                        </button>
+                        {color.id.startsWith('custom-') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeCustomColor(color.id);
+                            }}
+                            className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover-elevate"
+                            data-testid={`button-remove-${color.id}`}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
                         )}
-                      </button>
+                      </div>
                     ))}
+                    
+                    <Dialog open={customColorDialogOpen} onOpenChange={setCustomColorDialogOpen}>
+                      <DialogTrigger asChild>
+                        <button
+                          className="aspect-square w-full rounded-md border-2 border-dashed border-border flex items-center justify-center hover-elevate transition-all"
+                          data-testid="button-add-custom-color"
+                        >
+                          <Plus className="h-6 w-6 text-muted-foreground" />
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Add Custom Color</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div>
+                            <Label htmlFor="color-label" className="text-base">Color Name *</Label>
+                            <Input
+                              id="color-label"
+                              placeholder="e.g., Burgundy, Olive"
+                              value={customColorLabel}
+                              onChange={(e) => setCustomColorLabel(e.target.value)}
+                              className="mt-2"
+                              data-testid="input-color-label"
+                            />
+                          </div>
+
+                          <Tabs defaultValue="picker" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                              <TabsTrigger value="picker" data-testid="tab-picker">Picker</TabsTrigger>
+                              <TabsTrigger value="hex" data-testid="tab-hex">Hex</TabsTrigger>
+                              <TabsTrigger value="rgb" data-testid="tab-rgb">RGB</TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="picker" className="space-y-4">
+                              <div className="flex items-center gap-4">
+                                <input
+                                  type="color"
+                                  value={customColorInput}
+                                  onChange={(e) => handleHexChange(e.target.value)}
+                                  className="h-20 w-20 rounded-md cursor-pointer border-2 border-border"
+                                  data-testid="input-color-picker"
+                                />
+                                <div className="flex-1">
+                                  <div className="text-sm font-body text-muted-foreground mb-1">
+                                    Selected Color
+                                  </div>
+                                  <div 
+                                    className="h-20 w-full rounded-md border-2 border-border"
+                                    style={{ backgroundColor: customColorInput }}
+                                  />
+                                </div>
+                              </div>
+                            </TabsContent>
+                            
+                            <TabsContent value="hex" className="space-y-4">
+                              <div>
+                                <Label htmlFor="hex-input">Hex Code</Label>
+                                <Input
+                                  id="hex-input"
+                                  type="text"
+                                  value={customColorInput}
+                                  onChange={(e) => handleHexChange(e.target.value)}
+                                  placeholder="#000000"
+                                  className="mt-2 font-mono"
+                                  data-testid="input-hex"
+                                />
+                              </div>
+                              <div 
+                                className="h-20 w-full rounded-md border-2 border-border"
+                                style={{ backgroundColor: customColorInput }}
+                              />
+                            </TabsContent>
+                            
+                            <TabsContent value="rgb" className="space-y-4">
+                              <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                  <Label htmlFor="rgb-r">R</Label>
+                                  <Input
+                                    id="rgb-r"
+                                    type="number"
+                                    min="0"
+                                    max="255"
+                                    value={rgbR}
+                                    onChange={(e) => handleRgbChange(e.target.value, rgbG, rgbB)}
+                                    className="mt-2"
+                                    data-testid="input-rgb-r"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="rgb-g">G</Label>
+                                  <Input
+                                    id="rgb-g"
+                                    type="number"
+                                    min="0"
+                                    max="255"
+                                    value={rgbG}
+                                    onChange={(e) => handleRgbChange(rgbR, e.target.value, rgbB)}
+                                    className="mt-2"
+                                    data-testid="input-rgb-g"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor="rgb-b">B</Label>
+                                  <Input
+                                    id="rgb-b"
+                                    type="number"
+                                    min="0"
+                                    max="255"
+                                    value={rgbB}
+                                    onChange={(e) => handleRgbChange(rgbR, rgbG, e.target.value)}
+                                    className="mt-2"
+                                    data-testid="input-rgb-b"
+                                  />
+                                </div>
+                              </div>
+                              <div 
+                                className="h-20 w-full rounded-md border-2 border-border"
+                                style={{ backgroundColor: customColorInput }}
+                              />
+                            </TabsContent>
+                          </Tabs>
+
+                          <Button 
+                            onClick={handleAddCustomColor}
+                            className="w-full"
+                            disabled={!customColorLabel.trim()}
+                            data-testid="button-save-custom-color"
+                          >
+                            Add Color
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <div className="flex flex-wrap gap-2 mt-3">
                     {selectedColors.map(colorId => {
-                      const color = colorways.find(c => c.id === colorId);
+                      const color = allColors.find(c => c.id === colorId);
                       return color ? (
                         <Badge key={colorId} variant="secondary">
                           {color.label}
