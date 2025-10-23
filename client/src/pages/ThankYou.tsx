@@ -45,9 +45,11 @@ export default function ThankYou() {
                 <p className="text-sm font-body text-muted-foreground mb-3">
                   Forgot to upload something? You can add more files anytime.
                 </p>
-                <Button variant="outline" size="sm" data-testid="button-upload-more">
-                  Upload More Files
-                </Button>
+                <Link href="/request" data-testid="link-upload-more">
+                  <Button variant="outline" size="sm" data-testid="button-upload-more">
+                    Upload More Files
+                  </Button>
+                </Link>
               </div>
             </div>
           </Card>
