@@ -1,7 +1,8 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import type { Mesh, Group } from "three";
+import ErrorBoundary from "./ErrorBoundary";
 
 interface Product3DModelProps {
   type?: "tshirt" | "hoodie" | "cap" | "tote" | "crewneck" | "longsleeve";
@@ -81,8 +82,9 @@ function RotatingProduct({ type = "tshirt", color = "#2F6BFF" }: Product3DModelP
   );
 }
 
-export default function Product3DModel({ type, color }: Product3DModelProps) {
+function Product3DModelCanvas({ type, color }: Product3DModelProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [webglError, setWebglError] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -91,10 +93,12 @@ export default function Product3DModel({ type, color }: Product3DModelProps) {
     const handleContextLost = (event: Event) => {
       event.preventDefault();
       console.warn("WebGL context lost, attempting recovery...");
+      setWebglError(true);
     };
 
     const handleContextRestored = () => {
       console.log("WebGL context restored");
+      setWebglError(false);
     };
 
     canvas.addEventListener("webglcontextlost", handleContextLost);
@@ -106,18 +110,59 @@ export default function Product3DModel({ type, color }: Product3DModelProps) {
     };
   }, []);
 
-  return (
-    <div className="w-full h-full">
+  if (webglError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-muted/50 rounded-lg">
+        <div className="text-center p-8">
+          <p className="text-sm text-muted-foreground">3D Preview Unavailable</p>
+          <p className="text-xs text-muted-foreground mt-2">WebGL not supported</p>
+        </div>
+      </div>
+    );
+  }
+
+  try {
+    return (
       <Canvas
         ref={canvasRef}
-        gl={{ preserveDrawingBuffer: false, antialias: false }}
+        gl={{ 
+          preserveDrawingBuffer: false, 
+          antialias: false,
+          failIfMajorPerformanceCaveat: false
+        }}
         dpr={[1, 1.5]}
         performance={{ min: 0.5 }}
+        onCreated={(state) => {
+          console.log("Canvas created successfully");
+        }}
       >
         <PerspectiveCamera makeDefault position={[0, 0, 5]} />
         <RotatingProduct type={type} color={color} />
         <OrbitControls enableZoom={false} enablePan={false} />
       </Canvas>
+    );
+  } catch (error) {
+    console.error("Error creating Canvas:", error);
+    setWebglError(true);
+    return null;
+  }
+}
+
+export default function Product3DModel({ type = "tshirt", color = "#2F6BFF" }: Product3DModelProps) {
+  return (
+    <div className="w-full h-full">
+      <ErrorBoundary
+        fallback={
+          <div className="w-full h-full flex items-center justify-center bg-muted/50 rounded-lg">
+            <div className="text-center p-8">
+              <p className="text-sm text-muted-foreground">3D Preview Unavailable</p>
+              <p className="text-xs text-muted-foreground mt-2">Your browser doesn't support WebGL</p>
+            </div>
+          </div>
+        }
+      >
+        <Product3DModelCanvas type={type} color={color} />
+      </ErrorBoundary>
     </div>
   );
 }
