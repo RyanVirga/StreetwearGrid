@@ -44,7 +44,7 @@ export default function ProductShowcase({
             <Button 
               variant="secondary" 
               size="default" 
-              className="bg-white text-black hover:bg-white/90 font-medium uppercase text-xs tracking-wider px-6"
+              className="bg-white text-black font-medium uppercase text-xs tracking-wider px-6"
               data-testid={`button-quick-view-${name.toLowerCase().replace(/\s+/g, '-')}`}
             >
               QUICK VIEW
