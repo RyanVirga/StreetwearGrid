@@ -24,123 +24,124 @@ export default function ProductShowcase({
   return (
     <div className="w-screen h-screen flex-shrink-0 cursor-crosshair">
       <div className="relative w-full h-full flex items-center justify-center">
-      <DiagonalStripedBackground />
       <ScrollingMarquee text={marqueeText} />
       
-      <div className="relative z-10 w-full h-full flex items-center justify-center px-4 sm:px-12 lg:px-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 w-full max-w-7xl">
-          {/* Left: 3D Model with Product Info Overlay */}
-          <div className="relative flex items-center justify-center h-[50vh] lg:h-full">
-            <div className="w-full h-full max-w-lg">
+      <div className="relative z-10 w-full h-full grid grid-cols-1 lg:grid-cols-2">
+        {/* Left: 3D Model with Diagonal Stripes Background */}
+        <div className="relative flex items-center justify-center bg-background overflow-hidden">
+          <DiagonalStripedBackground />
+          
+          <div className="relative z-10 w-full h-full flex items-center justify-center p-8 lg:p-16">
+            <div className="w-full h-full max-w-md">
               <Product3DModel type={type} color={modelColor} />
             </div>
-            
-            {/* Product Info Overlay on Left */}
-            <div className="absolute left-4 bottom-8 z-20 max-w-xs">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-1 text-foreground">{name}</h2>
-              <p className="text-base text-foreground mb-3">${price}</p>
-              <Button 
-                variant="secondary" 
-                size="default" 
-                className="bg-white text-black hover:bg-white/90 font-medium"
-                data-testid={`button-quick-view-${name.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                QUICK VIEW
-              </Button>
-            </div>
           </div>
+          
+          {/* Product Info Overlay */}
+          <div className="absolute left-6 lg:left-12 bottom-12 lg:bottom-16 z-20 max-w-xs">
+            <h2 className="text-lg font-normal mb-1 text-foreground tracking-wide">{name}</h2>
+            <p className="text-base text-foreground mb-4">${price}</p>
+            <Button 
+              variant="secondary" 
+              size="default" 
+              className="bg-white text-black hover:bg-white/90 font-medium uppercase text-xs tracking-wider px-6"
+              data-testid={`button-quick-view-${name.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              QUICK VIEW
+            </Button>
+          </div>
+        </div>
 
-          {/* Right: Lifestyle Photo with Small Product Card */}
-          <div className="flex items-center justify-center h-[50vh] lg:h-full relative">
-            <div className="relative w-full h-full max-w-xl">
-              <img
-                src={image}
-                alt={name}
-                className="w-full h-full object-cover rounded-sm"
-              />
-              
-              {/* Small Product Card Bottom Right */}
-              <div className="absolute bottom-4 right-4 bg-background/95 backdrop-blur-sm p-3 rounded-sm border border-border max-w-[200px]">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-sm overflow-hidden flex-shrink-0">
-                    <img src={image} alt={name} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-xs font-semibold truncate">{name}</h3>
-                    <p className="text-xs text-muted-foreground">USD ${price}</p>
-                  </div>
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                    className="flex-shrink-0"
-                  >
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
+        {/* Right: Lifestyle Photo */}
+        <div className="relative flex items-center justify-center bg-muted/20">
+          <div className="relative w-full h-full">
+            <img
+              src={image}
+              alt={name}
+              className="w-full h-full object-cover"
+            />
+            
+            {/* Small Product Card Bottom Right */}
+            <div className="absolute bottom-6 right-6 bg-background/95 backdrop-blur-md p-3 rounded-md border border-border shadow-lg max-w-[180px]">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-sm overflow-hidden flex-shrink-0 bg-muted">
+                  <img src={image} alt={name} className="w-full h-full object-cover" />
                 </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[10px] font-medium truncate leading-tight">{name}</h3>
+                  <p className="text-[10px] text-muted-foreground">USD ${price}</p>
+                </div>
+                <svg 
+                  width="14" 
+                  height="14" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className="flex-shrink-0 opacity-70"
+                >
+                  <line x1="7" y1="17" x2="17" y2="7"></line>
+                  <polyline points="7 7 17 7 17 17"></polyline>
+                </svg>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Center Crosshair */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            className="opacity-30"
-          >
-            <circle cx="12" cy="12" r="2" fill="currentColor" className="text-foreground" />
-            <line
-              x1="12"
-              y1="0"
-              x2="12"
-              y2="8"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="2,2"
-              className="text-foreground"
-            />
-            <line
-              x1="12"
-              y1="16"
-              x2="12"
-              y2="24"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="2,2"
-              className="text-foreground"
-            />
-            <line
-              x1="0"
-              y1="12"
-              x2="8"
-              y2="12"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="2,2"
-              className="text-foreground"
-            />
-            <line
-              x1="16"
-              y1="12"
-              x2="24"
-              y2="12"
-              stroke="currentColor"
-              strokeWidth="1"
-              strokeDasharray="2,2"
-              className="text-foreground"
-            />
-          </svg>
-        </div>
+      {/* Center Crosshair */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30">
+        <svg
+          width="32"
+          height="32"
+          viewBox="0 0 32 32"
+          fill="none"
+          className="opacity-20"
+        >
+          <circle cx="16" cy="16" r="2" fill="currentColor" className="text-foreground" />
+          <line
+            x1="16"
+            y1="0"
+            x2="16"
+            y2="12"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3,3"
+            className="text-foreground"
+          />
+          <line
+            x1="16"
+            y1="20"
+            x2="16"
+            y2="32"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3,3"
+            className="text-foreground"
+          />
+          <line
+            x1="0"
+            y1="16"
+            x2="12"
+            y2="16"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3,3"
+            className="text-foreground"
+          />
+          <line
+            x1="20"
+            y1="16"
+            x2="32"
+            y2="16"
+            stroke="currentColor"
+            strokeWidth="1"
+            strokeDasharray="3,3"
+            className="text-foreground"
+          />
+        </svg>
       </div>
       </div>
     </div>
