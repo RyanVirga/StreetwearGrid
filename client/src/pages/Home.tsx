@@ -31,6 +31,7 @@ export default function Home() {
       image: teeImage,
       type: "tshirt" as const,
       modelColor: "#F5F5DC",
+      marqueeText: "CUSTOM SCREEN PRINTING // PREMIUM COTTON",
     },
     {
       name: "Heavyweight Hoodie",
@@ -38,6 +39,7 @@ export default function Home() {
       image: hoodieImage,
       type: "hoodie" as const,
       modelColor: "#1E3A5F",
+      marqueeText: "3D EMBROIDERY // FLEECE BLEND",
     },
     {
       name: "Baseball Cap",
@@ -45,6 +47,7 @@ export default function Home() {
       image: capImage,
       type: "cap" as const,
       modelColor: "#90C9A8",
+      marqueeText: "PREMIUM HEADWEAR // CUSTOM EMBROIDERY",
     },
     {
       name: "Canvas Tote",
@@ -52,6 +55,7 @@ export default function Home() {
       image: toteImage,
       type: "tote" as const,
       modelColor: "#F5F5DC",
+      marqueeText: "HEAVY CANVAS // SUSTAINABLE MATERIALS",
     },
   ];
 

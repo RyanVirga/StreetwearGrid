@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Product3DModel from "@/components/Product3DModel";
 import DiagonalStripedBackground from "@/components/DiagonalStripedBackground";
+import ScrollingMarquee from "@/components/ScrollingMarquee";
 
 interface ProductShowcaseProps {
   name: string;
@@ -9,6 +10,7 @@ interface ProductShowcaseProps {
   image: string;
   type?: "tshirt" | "hoodie" | "cap" | "tote" | "crewneck" | "longsleeve";
   modelColor?: string;
+  marqueeText?: string;
 }
 
 export default function ProductShowcase({
@@ -17,20 +19,38 @@ export default function ProductShowcase({
   image,
   type = "tshirt",
   modelColor = "#2F6BFF",
+  marqueeText = "PREMIUM CUSTOM MERCH",
 }: ProductShowcaseProps) {
   return (
-    <div className="w-screen h-screen flex-shrink-0">
+    <div className="w-screen h-screen flex-shrink-0 cursor-crosshair">
       <div className="relative w-full h-full flex items-center justify-center">
       <DiagonalStripedBackground />
+      <ScrollingMarquee text={marqueeText} />
       
       <div className="relative z-10 w-full h-full flex items-center justify-center px-4 sm:px-12 lg:px-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 w-full max-w-7xl">
-          <div className="flex items-center justify-center h-[50vh] lg:h-full">
+          {/* Left: 3D Model with Product Info Overlay */}
+          <div className="relative flex items-center justify-center h-[50vh] lg:h-full">
             <div className="w-full h-full max-w-lg">
               <Product3DModel type={type} color={modelColor} />
             </div>
+            
+            {/* Product Info Overlay on Left */}
+            <div className="absolute left-4 bottom-8 z-20 max-w-xs">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-1 text-foreground">{name}</h2>
+              <p className="text-base text-foreground mb-3">${price}</p>
+              <Button 
+                variant="secondary" 
+                size="default" 
+                className="bg-white text-black hover:bg-white/90 font-medium"
+                data-testid={`button-quick-view-${name.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                QUICK VIEW
+              </Button>
+            </div>
           </div>
 
+          {/* Right: Lifestyle Photo with Small Product Card */}
           <div className="flex items-center justify-center h-[50vh] lg:h-full relative">
             <div className="relative w-full h-full max-w-xl">
               <img
@@ -39,30 +59,46 @@ export default function ProductShowcase({
                 className="w-full h-full object-cover rounded-sm"
               />
               
-              <div className="absolute bottom-4 right-4 bg-background/95 backdrop-blur-sm p-4 rounded-sm border border-border">
+              {/* Small Product Card Bottom Right */}
+              <div className="absolute bottom-4 right-4 bg-background/95 backdrop-blur-sm p-3 rounded-sm border border-border max-w-[200px]">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-sm overflow-hidden flex-shrink-0">
                     <img src={image} alt={name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold truncate">{name}</h3>
-                    <p className="text-xs text-muted-foreground">USD {price}</p>
+                    <h3 className="text-xs font-semibold truncate">{name}</h3>
+                    <p className="text-xs text-muted-foreground">USD ${price}</p>
                   </div>
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                    className="flex-shrink-0"
+                  >
+                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                    <polyline points="7 7 17 7 17 17"></polyline>
+                  </svg>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Center Crosshair */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
           <svg
             width="24"
             height="24"
             viewBox="0 0 24 24"
             fill="none"
-            className="opacity-40"
+            className="opacity-30"
           >
-            <circle cx="12" cy="12" r="2" fill="currentColor" className="text-muted-foreground" />
+            <circle cx="12" cy="12" r="2" fill="currentColor" className="text-foreground" />
             <line
               x1="12"
               y1="0"
@@ -71,7 +107,7 @@ export default function ProductShowcase({
               stroke="currentColor"
               strokeWidth="1"
               strokeDasharray="2,2"
-              className="text-muted-foreground"
+              className="text-foreground"
             />
             <line
               x1="12"
@@ -81,7 +117,7 @@ export default function ProductShowcase({
               stroke="currentColor"
               strokeWidth="1"
               strokeDasharray="2,2"
-              className="text-muted-foreground"
+              className="text-foreground"
             />
             <line
               x1="0"
@@ -91,7 +127,7 @@ export default function ProductShowcase({
               stroke="currentColor"
               strokeWidth="1"
               strokeDasharray="2,2"
-              className="text-muted-foreground"
+              className="text-foreground"
             />
             <line
               x1="16"
@@ -101,18 +137,10 @@ export default function ProductShowcase({
               stroke="currentColor"
               strokeWidth="1"
               strokeDasharray="2,2"
-              className="text-muted-foreground"
+              className="text-foreground"
             />
           </svg>
         </div>
-      </div>
-
-      <div className="absolute left-8 top-1/2 -translate-y-1/2 z-20 max-w-xs">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-2 text-foreground">{name}</h2>
-        <p className="text-lg text-muted-foreground mb-4">${price}</p>
-        <Button variant="outline" size="default" data-testid={`button-quick-view-${name.toLowerCase().replace(/\s+/g, '-')}`}>
-          QUICK VIEW
-        </Button>
       </div>
       </div>
     </div>
