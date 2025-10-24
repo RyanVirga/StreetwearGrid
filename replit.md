@@ -105,3 +105,38 @@ The application embraces a **streetwear editorial aesthetic** with:
 - Mobile-first responsive breakpoints
 
 This design direction influences component structure, with reusable cards, badges, and layout primitives that maintain visual consistency throughout the wizard flow, catalog browsing, and gallery presentation.
+
+### Hero Showcase Design (Shopify Supply-Inspired)
+
+**Updated December 2024**: The homepage hero showcase has been redesigned to match Shopify Supply's aesthetic:
+
+**Horizontal Scroll Showcase Components**:
+- `HorizontalScrollSection`: Converts vertical scroll into horizontal content movement using Framer Motion
+- `ProductShowcase`: Two-column split layout featuring 3D model on left, lifestyle photo on right
+- `ScrollingMarquee`: Animated text marquee displaying product-specific messaging
+- `Product3DModel`: React Three Fiber canvas with placeholder geometric shapes and ErrorBoundary fallback
+- `ScrollProgressIndicator`: Fixed circular progress indicator showing scroll position
+
+**Layout Structure**:
+- **Left Panel**: Diagonal striped dark background with 3D model placeholder and product info overlay (bottom-left: name, price, "QUICK VIEW" button)
+- **Right Panel**: Full-bleed lifestyle photo with small product card (bottom-right: thumbnail, name, price, arrow icon)
+- **Crosshair Cursor**: Custom cursor throughout showcase section
+- **Scrolling Marquee**: Large italic text at top with product-specific messaging (e.g., "3D EMBROIDERY // FLEECE BLEND")
+
+**Error Handling**:
+- `ErrorBoundary`: React error boundary component catches rendering errors and displays fallback UI
+- WebGL context loss handling in `Product3DModel` with `event.preventDefault()` for recovery attempts
+- Graceful degradation: Shows "3D Preview Unavailable" message when WebGL is not supported
+- Optimized Canvas settings: disabled preserveDrawingBuffer and antialias, limited DPR for performance
+
+**3D Model Implementation**:
+- Currently uses placeholder geometric shapes (boxes, cylinders, spheres) via Three.js primitives
+- Models rotate automatically with OrbitControls for interaction
+- Ready to swap with production .glb/.gltf files when available
+- Integration: React Three Fiber v8.17 for React 18 compatibility
+
+**Recent Fixes (October 2024)**:
+- Fixed `@replit/vite-plugin-cartographer` error by updating to latest version
+- Added WebGL context recovery handlers to prevent page crashes
+- Implemented ErrorBoundary to gracefully handle 3D rendering failures
+- Optimized horizontal scroll translation to ensure all products fully enter viewport
