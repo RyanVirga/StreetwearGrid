@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import Product3DModel from "@/components/Product3DModel";
 import DiagonalStripedBackground from "@/components/DiagonalStripedBackground";
 import ScrollingMarquee from "@/components/ScrollingMarquee";
-import { MotionValue, useTransform } from "framer-motion";
+import { MotionValue, useTransform, useMotionValue } from "framer-motion";
 import { useEffect, useState } from "react";
 
 interface ProductShowcaseProps {
@@ -13,6 +13,8 @@ interface ProductShowcaseProps {
   modelColor?: string;
   marqueeText?: string;
   scrollProgress?: MotionValue<number>;
+  productIndex?: number;
+  totalProducts?: number;
 }
 
 export default function ProductShowcase({
@@ -23,19 +25,35 @@ export default function ProductShowcase({
   modelColor = "#2F6BFF",
   marqueeText = "PREMIUM CUSTOM MERCH",
   scrollProgress,
+  productIndex = 0,
+  totalProducts = 1,
 }: ProductShowcaseProps) {
   const [currentProgress, setCurrentProgress] = useState(0);
+  
+  // Create fallback MotionValue if scrollProgress is not provided
+  const fallbackScrollProgress = useMotionValue(0);
+  const actualScrollProgress = scrollProgress || fallbackScrollProgress;
+
+  // Calculate this product's individual scroll progress
+  // Must be called unconditionally at top level
+  const startProgress = productIndex / totalProducts;
+  const endProgress = (productIndex + 1) / totalProducts;
+  
+  // Always call useTransform unconditionally
+  const productScrollProgress = useTransform(
+    actualScrollProgress, 
+    [startProgress, endProgress], 
+    [0, 1]
+  );
 
   // Subscribe to scroll progress changes
   useEffect(() => {
-    if (!scrollProgress) return;
-    
-    const unsubscribe = scrollProgress.on("change", (latest) => {
+    const unsubscribe = productScrollProgress.on("change", (latest) => {
       setCurrentProgress(latest);
     });
 
     return () => unsubscribe();
-  }, [scrollProgress]);
+  }, [productScrollProgress]);
 
   return (
     <div className="w-screen h-screen flex-shrink-0 cursor-crosshair">

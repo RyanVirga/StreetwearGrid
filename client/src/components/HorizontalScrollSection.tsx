@@ -1,4 +1,4 @@
-import { useRef, ReactNode, ReactElement, cloneElement, Children } from "react";
+import { useRef, ReactNode, ReactElement, cloneElement, Children, useMemo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ScrollProgressIndicator from "./ScrollProgressIndicator";
 
@@ -18,28 +18,21 @@ export default function HorizontalScrollSection({ children }: HorizontalScrollSe
   
   const x = useTransform(scrollYProgress, [0, 1], ["0%", endTranslation]);
 
-  // Calculate individual scroll progress for each child
-  const childrenWithProps = Children.map(children, (child, index) => {
-    if (!child || typeof child !== 'object' || !('props' in child)) {
-      return child;
-    }
+  // Clone children with global scroll progress and their index
+  // Each child can create its own transform without violating hooks rules
+  const childrenWithProps = useMemo(() => {
+    return Children.map(children, (child, index) => {
+      if (!child || typeof child !== 'object' || !('props' in child)) {
+        return child;
+      }
 
-    // Calculate this product's scroll progress
-    // Each product gets 1/childCount of the total scroll
-    const startProgress = index / childCount;
-    const endProgress = (index + 1) / childCount;
-    
-    // Create a transform that goes from 0 to 1 for this specific product
-    const productScrollProgress = useTransform(
-      scrollYProgress,
-      [startProgress, endProgress],
-      [0, 1]
-    );
-
-    return cloneElement(child as ReactElement, {
-      scrollProgress: productScrollProgress,
+      return cloneElement(child as ReactElement, {
+        scrollProgress: scrollYProgress,
+        productIndex: index,
+        totalProducts: childCount,
+      });
     });
-  });
+  }, [children, scrollYProgress, childCount]);
 
   return (
     <section ref={targetRef} className="relative h-[500vh]">

@@ -11,6 +11,17 @@ interface Product3DModelProps {
   fallbackImage?: string;
 }
 
+// Detect WebGL support
+function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    return !!gl;
+  } catch (e) {
+    return false;
+  }
+}
+
 function TShirtMesh({ color = "#2F6BFF", rotation = 0 }: { color: string; rotation: number }) {
   const meshRef = useRef<THREE.Group>(null);
 
@@ -276,14 +287,38 @@ function ProductMesh({ type = "tshirt", color = "#2F6BFF", scrollProgress = 0 }:
   );
 }
 
+function FallbackView({ fallbackImage }: { fallbackImage?: string }) {
+  if (fallbackImage) {
+    return (
+      <div className="w-full h-full flex items-center justify-center p-8">
+        <img 
+          src={fallbackImage} 
+          alt="Product preview" 
+          className="w-full h-full object-contain opacity-80"
+        />
+      </div>
+    );
+  }
+  
+  return (
+    <div className="w-full h-full flex items-center justify-center bg-muted/30">
+      <div className="text-center p-6">
+        <p className="text-sm text-muted-foreground mb-2">3D Preview Unavailable</p>
+        <p className="text-xs text-muted-foreground">WebGL not supported</p>
+      </div>
+    </div>
+  );
+}
+
 function Product3DModelCanvas({ type, color, scrollProgress, fallbackImage }: Product3DModelProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [webglError, setWebglError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [hasWebGL] = useState(() => isWebGLAvailable());
 
   // Lazy load - only render when visible
   useEffect(() => {
+    if (!hasWebGL) return; // Skip intersection observer if no WebGL
+    
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -300,41 +335,13 @@ function Product3DModelCanvas({ type, color, scrollProgress, fallbackImage }: Pr
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [hasWebGL]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const handleContextLost = (event: Event) => {
-      event.preventDefault();
-      console.warn("WebGL context lost");
-      setWebglError(true);
-    };
-
-    const handleContextRestored = () => {
-      console.log("WebGL context restored");
-      setWebglError(false);
-    };
-
-    canvas.addEventListener("webglcontextlost", handleContextLost);
-    canvas.addEventListener("webglcontextrestored", handleContextRestored);
-
-    return () => {
-      canvas.removeEventListener("webglcontextlost", handleContextLost);
-      canvas.removeEventListener("webglcontextrestored", handleContextRestored);
-    };
-  }, [isVisible]);
-
-  // Show fallback image if WebGL fails
-  if (webglError && fallbackImage) {
+  // If no WebGL support, show fallback immediately
+  if (!hasWebGL) {
     return (
-      <div ref={containerRef} className="w-full h-full flex items-center justify-center">
-        <img 
-          src={fallbackImage} 
-          alt="Product preview" 
-          className="w-full h-full object-contain opacity-70"
-        />
+      <div ref={containerRef} className="w-full h-full">
+        <FallbackView fallbackImage={fallbackImage} />
       </div>
     );
   }
@@ -351,41 +358,26 @@ function Product3DModelCanvas({ type, color, scrollProgress, fallbackImage }: Pr
     );
   }
 
-  if (webglError) {
-    return (
-      <div ref={containerRef} className="w-full h-full flex items-center justify-center bg-muted/30">
-        <div className="text-center p-6">
-          <p className="text-sm text-muted-foreground mb-2">3D Preview Unavailable</p>
-          <p className="text-xs text-muted-foreground">WebGL not supported</p>
-        </div>
-      </div>
-    );
-  }
-
-  try {
-    return (
-      <div ref={containerRef} className="w-full h-full">
-        <Canvas
-          ref={canvasRef}
-          gl={{ 
-            preserveDrawingBuffer: false, 
-            antialias: true,
-            alpha: true,
-            failIfMajorPerformanceCaveat: false,
-          }}
-          dpr={[1, 2]}
-          performance={{ min: 0.5 }}
-        >
-          <PerspectiveCamera makeDefault position={[0, 0, 5]} />
-          <ProductMesh type={type} color={color} scrollProgress={scrollProgress} />
-        </Canvas>
-      </div>
-    );
-  } catch (error) {
-    console.error("Error creating Canvas:", error);
-    setWebglError(true);
-    return null;
-  }
+  return (
+    <div ref={containerRef} className="w-full h-full">
+      <Canvas
+        gl={{ 
+          preserveDrawingBuffer: false, 
+          antialias: true,
+          alpha: true,
+          failIfMajorPerformanceCaveat: false,
+        }}
+        dpr={[1, 2]}
+        performance={{ min: 0.5 }}
+        onCreated={() => {
+          // Canvas created successfully
+        }}
+      >
+        <PerspectiveCamera makeDefault position={[0, 0, 5]} />
+        <ProductMesh type={type} color={color} scrollProgress={scrollProgress} />
+      </Canvas>
+    </div>
+  );
 }
 
 export default function Product3DModel({ 
@@ -397,24 +389,7 @@ export default function Product3DModel({
   return (
     <div className="w-full h-full">
       <ErrorBoundary
-        fallback={
-          fallbackImage ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <img 
-                src={fallbackImage} 
-                alt="Product preview" 
-                className="w-full h-full object-contain opacity-70"
-              />
-            </div>
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-muted/30">
-              <div className="text-center p-6">
-                <p className="text-sm text-muted-foreground mb-2">3D Preview Unavailable</p>
-                <p className="text-xs text-muted-foreground">Your browser doesn't support WebGL</p>
-              </div>
-            </div>
-          )
-        }
+        fallback={<FallbackView fallbackImage={fallbackImage} />}
       >
         <Product3DModelCanvas 
           type={type} 
