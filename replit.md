@@ -136,12 +136,15 @@ This design direction influences component structure, with reusable cards, badge
     - Hoodie: Body, sleeves, hood with drawstrings, and kangaroo pocket
     - Baseball Cap: Dome, curved brim, and top button
     - Tote Bag: Rectangular body with gusset and handles
-- **Spline Integration**:
+- **Spline Integration** (Fixed October 27, 2025):
   - `SplineModel` component wraps `<spline-viewer>` web component (v1.10.88)
-  - Runtime captured from `event.detail.spline` in load event
-  - Scroll-based rotation: `rotation.y = -scrollProgress * Math.PI * 2` (right-to-left)
-  - Multiple rotation strategies: setVariable API, findObjectByName, scene fallback
+  - **Runtime Access**: Uses private `_spline` property (not public `spline` property)
+  - **Loading Strategy**: Polling mechanism (500ms intervals, 15 attempts max) to reliably capture runtime
+  - **Web Component Registration**: Uses `customElements.whenDefined()` before rendering
+  - **Scroll-Based Rotation**: Direct scene manipulation - `rotation.y = -scrollProgress * Math.PI * 2` (right-to-left)
+  - **Rotation Implementation**: Rotates both `scene.rotation.y` and `scene.children[0].rotation.y` for compatibility
   - Calls `requestRender()` to ensure visual updates
+  - **Lazy Loading**: IntersectionObserver triggers rendering only when in viewport
 - **Scroll-Based Rotation**: Models rotate 360° based on scroll progress (0→1 per product)
 - **Lazy Loading**: IntersectionObserver delays rendering until product enters viewport
 - **WebGL Detection**: Early detection with graceful fallback to product images
