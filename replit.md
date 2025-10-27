@@ -130,14 +130,21 @@ This design direction influences component structure, with reusable cards, badge
 - Optimized Canvas settings: disabled preserveDrawingBuffer and antialias, limited DPR for performance
 
 **3D Model Implementation (October 2025)**:
-- **Realistic Product Geometry**: Custom Three.js meshes for each product type:
-  - T-Shirt: Torso with angled sleeves, collar, and fabric folds
-  - Hoodie: Body, sleeves, hood with drawstrings, and kangaroo pocket
-  - Baseball Cap: Dome, curved brim, and top button
-  - Tote Bag: Rectangular body with gusset and handles
+- **Hybrid 3D Approach**:
+  - **Premium T-Shirt**: Uses Spline 3D viewer with custom scene (`https://prod.spline.design/HN9Zy45KS-veyNHt/scene.splinecode`)
+  - **Other Products**: Custom Three.js meshes with realistic geometry:
+    - Hoodie: Body, sleeves, hood with drawstrings, and kangaroo pocket
+    - Baseball Cap: Dome, curved brim, and top button
+    - Tote Bag: Rectangular body with gusset and handles
+- **Spline Integration**:
+  - `SplineModel` component wraps `<spline-viewer>` web component (v1.10.88)
+  - Runtime captured from `event.detail.spline` in load event
+  - Scroll-based rotation: `rotation.y = -scrollProgress * Math.PI * 2` (right-to-left)
+  - Multiple rotation strategies: setVariable API, findObjectByName, scene fallback
+  - Calls `requestRender()` to ensure visual updates
 - **Scroll-Based Rotation**: Models rotate 360° based on scroll progress (0→1 per product)
-- **Lazy Loading**: IntersectionObserver delays Canvas rendering until product enters viewport
-- **WebGL Detection**: Early detection of WebGL support with graceful fallback to product images
+- **Lazy Loading**: IntersectionObserver delays rendering until product enters viewport
+- **WebGL Detection**: Early detection with graceful fallback to product images
 - **Performance Optimized**: Disabled preserveDrawingBuffer and antialias, limited DPR to 1.5
 
 **Scroll Progress Architecture**:
