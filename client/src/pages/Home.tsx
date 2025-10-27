@@ -32,7 +32,7 @@ export default function Home() {
       type: "tshirt" as const,
       modelColor: "#F5F5DC",
       marqueeText: "CUSTOM SCREEN PRINTING // PREMIUM COTTON",
-      splineUrl: "https://my.spline.design/untitled-ZfPPVu3CvwQ20F2vP0AcL0NO/",
+      splineUrl: "https://prod.spline.design/HN9Zy45KS-veyNHt/scene.splinecode",
     },
     {
       name: "Heavyweight Hoodie",
