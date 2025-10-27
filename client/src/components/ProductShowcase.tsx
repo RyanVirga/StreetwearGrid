@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Product3DModel from "@/components/Product3DModel";
+import SplineModel from "@/components/SplineModel";
 import DiagonalStripedBackground from "@/components/DiagonalStripedBackground";
 import ScrollingMarquee from "@/components/ScrollingMarquee";
 import { MotionValue, useTransform, useMotionValue } from "framer-motion";
@@ -15,6 +16,7 @@ interface ProductShowcaseProps {
   scrollProgress?: MotionValue<number>;
   productIndex?: number;
   totalProducts?: number;
+  splineUrl?: string;
 }
 
 export default function ProductShowcase({
@@ -27,6 +29,7 @@ export default function ProductShowcase({
   scrollProgress,
   productIndex = 0,
   totalProducts = 1,
+  splineUrl,
 }: ProductShowcaseProps) {
   const [currentProgress, setCurrentProgress] = useState(0);
   
@@ -67,12 +70,20 @@ export default function ProductShowcase({
           
           <div className="relative z-10 w-full h-full flex items-center justify-center p-8 lg:p-16">
             <div className="w-full h-full max-w-md">
-              <Product3DModel 
-                type={type} 
-                color={modelColor}
-                scrollProgress={currentProgress}
-                fallbackImage={image}
-              />
+              {splineUrl ? (
+                <SplineModel 
+                  sceneUrl={splineUrl}
+                  scrollProgress={currentProgress}
+                  fallbackImage={image}
+                />
+              ) : (
+                <Product3DModel 
+                  type={type} 
+                  color={modelColor}
+                  scrollProgress={currentProgress}
+                  fallbackImage={image}
+                />
+              )}
             </div>
           </div>
           
