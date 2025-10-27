@@ -129,14 +129,34 @@ This design direction influences component structure, with reusable cards, badge
 - Graceful degradation: Shows "3D Preview Unavailable" message when WebGL is not supported
 - Optimized Canvas settings: disabled preserveDrawingBuffer and antialias, limited DPR for performance
 
-**3D Model Implementation**:
-- Currently uses placeholder geometric shapes (boxes, cylinders, spheres) via Three.js primitives
-- Models rotate automatically with OrbitControls for interaction
-- Ready to swap with production .glb/.gltf files when available
-- Integration: React Three Fiber v8.17 for React 18 compatibility
+**3D Model Implementation (October 2025)**:
+- **Realistic Product Geometry**: Custom Three.js meshes for each product type:
+  - T-Shirt: Torso with angled sleeves, collar, and fabric folds
+  - Hoodie: Body, sleeves, hood with drawstrings, and kangaroo pocket
+  - Baseball Cap: Dome, curved brim, and top button
+  - Tote Bag: Rectangular body with gusset and handles
+- **Scroll-Based Rotation**: Models rotate 360° based on scroll progress (0→1 per product)
+- **Lazy Loading**: IntersectionObserver delays Canvas rendering until product enters viewport
+- **WebGL Detection**: Early detection of WebGL support with graceful fallback to product images
+- **Performance Optimized**: Disabled preserveDrawingBuffer and antialias, limited DPR to 1.5
 
-**Recent Fixes (October 2024)**:
-- Fixed `@replit/vite-plugin-cartographer` error by updating to latest version
-- Added WebGL context recovery handlers to prevent page crashes
-- Implemented ErrorBoundary to gracefully handle 3D rendering failures
-- Optimized horizontal scroll translation to ensure all products fully enter viewport
+**Scroll Progress Architecture**:
+- **Scalable Design**: Supports any number of products without hardcoding
+- **HorizontalScrollSection**: Passes global scrollProgress, productIndex, and totalProducts to children
+- **ProductShowcase**: Creates own useTransform at top level with calculated scroll segment
+- **Rules of Hooks Compliant**: All hooks called unconditionally at top level
+- **Segment Calculation**: Each product receives 0→1 progress for its portion of scroll (Product 0: 0-0.25, Product 1: 0.25-0.5, etc.)
+- **Rotation Mapping**: `rotation = scrollProgress * Math.PI * 2` (full 360° rotation per product)
+
+**Error Handling & Resilience**:
+- ErrorBoundary catches rendering errors with fallback UI
+- WebGL context loss recovery handlers
+- Graceful fallback to product images when WebGL unavailable
+- Works in headless/CI environments without errors
+- No React warnings or hooks violations
+
+**Technical Implementation**:
+- React Three Fiber v8.17 for React 18 compatibility
+- Framer Motion for scroll-driven animations
+- Custom MotionValue fallback ensures hooks compliance
+- Production-ready with architect approval
