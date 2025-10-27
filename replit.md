@@ -131,7 +131,7 @@ This design direction influences component structure, with reusable cards, badge
 
 **3D Model Implementation (October 2025)**:
 - **Hybrid 3D Approach**:
-  - **Premium T-Shirt**: Uses Spline 3D viewer with custom scene (`https://prod.spline.design/HN9Zy45KS-veyNHt/scene.splinecode`)
+  - **Premium T-Shirt**: Uses Spline 3D viewer with custom scene (`https://prod.spline.design/untitled-ZfPPVu3CvwQ20F2vP0AcL0NO/scene.splinecode`)
   - **Other Products**: Custom Three.js meshes with realistic geometry:
     - Hoodie: Body, sleeves, hood with drawstrings, and kangaroo pocket
     - Baseball Cap: Dome, curved brim, and top button
