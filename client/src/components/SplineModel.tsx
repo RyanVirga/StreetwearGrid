@@ -1,28 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import ErrorBoundary from "./ErrorBoundary";
 
-// TypeScript declaration for spline-viewer web component
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'spline-viewer': any;
-    }
-  }
-}
-
 interface SplineModelProps {
-  sceneUrl: string;
+  iframeUrl: string;
   scrollProgress?: number;
   fallbackImage?: string;
   className?: string;
 }
 
-function SplineModelContent({ sceneUrl, scrollProgress = 0, fallbackImage, className = "" }: SplineModelProps) {
-  const viewerRef = useRef<any>(null);
+function SplineModelContent({ iframeUrl, scrollProgress = 0, fallbackImage, className = "" }: SplineModelProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Lazy loading with IntersectionObserver
   useEffect(() => {
@@ -45,44 +36,39 @@ function SplineModelContent({ sceneUrl, scrollProgress = 0, fallbackImage, class
     return () => observer.disconnect();
   }, []);
 
-  // Control rotation based on scroll progress
+  // Handle iframe load
   useEffect(() => {
-    if (!isLoaded || !viewerRef.current) return;
+    if (!iframeRef.current || !isInView) return;
 
-    try {
-      const splineViewer = viewerRef.current;
-      
-      // Access the Spline runtime API
-      splineViewer.addEventListener('load', () => {
-        const spline = splineViewer.spline;
-        
-        // Find the main object to rotate (usually the root or a named object)
-        // This assumes your Spline scene has an object we can rotate
-        if (spline && spline.findObjectByName) {
-          const mainObject = spline.findObjectByName('Scene') || spline.scene;
-          
-          if (mainObject) {
-            // Map scroll progress (0-1) to rotation (0-360 degrees)
-            const rotation = scrollProgress * Math.PI * 2;
-            mainObject.rotation.y = rotation;
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Spline rotation control error:', error);
-    }
-  }, [scrollProgress, isLoaded]);
+    const handleLoad = () => {
+      setIsLoaded(true);
+    };
 
-  // Handle viewer load
-  const handleLoad = () => {
-    setIsLoaded(true);
-  };
+    const handleError = () => {
+      setHasError(true);
+    };
 
-  // Handle errors
-  const handleError = () => {
-    console.error('Spline viewer failed to load');
-    setHasError(true);
-  };
+    const iframe = iframeRef.current;
+    iframe.addEventListener('load', handleLoad);
+    iframe.addEventListener('error', handleError);
+
+    // Set timeout for load error
+    const timeout = setTimeout(() => {
+      if (!isLoaded) {
+        setHasError(true);
+      }
+    }, 10000);
+
+    return () => {
+      iframe.removeEventListener('load', handleLoad);
+      iframe.removeEventListener('error', handleError);
+      clearTimeout(timeout);
+    };
+  }, [isInView, isLoaded]);
+
+  // Note: Controlling rotation of Spline scenes loaded via iframe is limited
+  // The Spline iframe doesn't expose the same API as the viewer component
+  // For full rotation control, you'd need to export the scene and use the viewer component
 
   // Show fallback if error or not in view yet
   if (hasError || !isInView) {
@@ -104,17 +90,23 @@ function SplineModelContent({ sceneUrl, scrollProgress = 0, fallbackImage, class
   }
 
   return (
-    <div ref={containerRef} className={`w-full h-full ${className}`}>
-      <spline-viewer
-        ref={viewerRef}
-        url={sceneUrl}
-        onLoad={handleLoad}
-        onError={handleError}
+    <div ref={containerRef} className={`relative w-full h-full ${className}`}>
+      <iframe
+        ref={iframeRef}
+        src={iframeUrl}
+        frameBorder="0"
+        className="w-full h-full"
         style={{
-          width: '100%',
-          height: '100%',
+          border: 'none',
+          borderRadius: '0',
         }}
+        title="3D Model"
       />
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background text-muted-foreground text-sm">
+          Loading 3D Model...
+        </div>
+      )}
     </div>
   );
 }

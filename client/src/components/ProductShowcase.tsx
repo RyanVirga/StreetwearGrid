@@ -72,7 +72,7 @@ export default function ProductShowcase({
             <div className="w-full h-full max-w-md">
               {splineUrl ? (
                 <SplineModel 
-                  sceneUrl={splineUrl}
+                  iframeUrl={splineUrl}
                   scrollProgress={currentProgress}
                   fallbackImage={image}
                 />
