@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import Product3DModel from "@/components/Product3DModel";
 import DiagonalStripedBackground from "@/components/DiagonalStripedBackground";
 import ScrollingMarquee from "@/components/ScrollingMarquee";
+import { MotionValue, useTransform } from "framer-motion";
+import { useEffect, useState } from "react";
 
 interface ProductShowcaseProps {
   name: string;
@@ -11,6 +12,7 @@ interface ProductShowcaseProps {
   type?: "tshirt" | "hoodie" | "cap" | "tote" | "crewneck" | "longsleeve";
   modelColor?: string;
   marqueeText?: string;
+  scrollProgress?: MotionValue<number>;
 }
 
 export default function ProductShowcase({
@@ -20,7 +22,21 @@ export default function ProductShowcase({
   type = "tshirt",
   modelColor = "#2F6BFF",
   marqueeText = "PREMIUM CUSTOM MERCH",
+  scrollProgress,
 }: ProductShowcaseProps) {
+  const [currentProgress, setCurrentProgress] = useState(0);
+
+  // Subscribe to scroll progress changes
+  useEffect(() => {
+    if (!scrollProgress) return;
+    
+    const unsubscribe = scrollProgress.on("change", (latest) => {
+      setCurrentProgress(latest);
+    });
+
+    return () => unsubscribe();
+  }, [scrollProgress]);
+
   return (
     <div className="w-screen h-screen flex-shrink-0 cursor-crosshair">
       <div className="relative w-full h-full flex items-center justify-center">
@@ -33,7 +49,12 @@ export default function ProductShowcase({
           
           <div className="relative z-10 w-full h-full flex items-center justify-center p-8 lg:p-16">
             <div className="w-full h-full max-w-md">
-              <Product3DModel type={type} color={modelColor} />
+              <Product3DModel 
+                type={type} 
+                color={modelColor}
+                scrollProgress={currentProgress}
+                fallbackImage={image}
+              />
             </div>
           </div>
           
