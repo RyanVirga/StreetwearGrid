@@ -37,7 +37,7 @@ export default function HorizontalScrollSection({ children }: HorizontalScrollSe
   return (
     <section ref={targetRef} className="relative h-[500vh]">
       <ScrollProgressIndicator scrollProgress={scrollYProgress} />
-      <div className="sticky top-0 h-screen overflow-hidden">
+      <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
         <motion.div
           style={{ x }}
           className="flex h-full items-center"

@@ -58,7 +58,7 @@ export default function ProductShowcase({
   }, [productScrollProgress]);
 
   return (
-    <div className="w-screen h-screen flex-shrink-0 cursor-crosshair">
+    <div className="w-screen h-full flex-shrink-0 cursor-crosshair">
       <div className="relative w-full h-full flex items-center justify-center">
       <ScrollingMarquee text={marqueeText} />
       
