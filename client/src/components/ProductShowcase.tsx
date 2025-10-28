@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import PlainThreeTShirt from "@/components/PlainThreeTShirt";
+import SplineTShirt from "@/components/SplineTShirt";
 import DiagonalStripedBackground from "@/components/DiagonalStripedBackground";
 import ScrollingMarquee from "@/components/ScrollingMarquee";
 import { MotionValue, useTransform, useMotionValue } from "framer-motion";
@@ -70,8 +70,7 @@ export default function ProductShowcase({
           <div className="relative z-10 w-full h-full flex items-center justify-center p-8 lg:p-16">
             <div className="w-full h-full max-w-md">
               {type === "tshirt" ? (
-                <PlainThreeTShirt 
-                  color={modelColor}
+                <SplineTShirt 
                   scrollProgress={currentProgress}
                   fallbackImage={image}
                 />

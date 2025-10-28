@@ -130,25 +130,28 @@ This design direction influences component structure, with reusable cards, badge
 - Optimized Canvas settings: disabled preserveDrawingBuffer and antialias, limited DPR for performance
 
 **3D Model Implementation (October 2025)**:
-- **Vanilla Three.js Solution** (October 28, 2025):
-  - Successfully bypassed React Three Fiber compatibility issues by using plain Three.js
-  - **PlainThreeTShirt Component**: Manually manages WebGL canvas, scene, camera, and renderer
-  - Custom t-shirt geometry using THREE.BoxGeometry and THREE.CylinderGeometry primitives
-  - Scroll-based rotation: `mesh.rotation.y = scrollProgress * Math.PI * 2` (360° per product)
-  - **Graceful WebGL Fallback**: Detects WebGL availability on mount; falls back to product images if unavailable
-  - Proper cleanup: Disposes geometries, materials, cancels animation loop, removes canvas element
-  - Memory management: Nulls sceneRef.current to accelerate garbage collection
-  - **Test Status**: Passed - component works with and without WebGL, showcase scrolling functional
+- **Spline 3D Integration** (October 28, 2025 - CURRENT):
+  - ✅ Successfully integrated Spline 3D model using URL: `https://prod.spline.design/HN9Zy45KS-veyNHt/scene.splinecode`
+  - **SplineTShirt Component**: Uses vanilla Spline Runtime API (bypasses React wrapper hook issues)
+  - Asynchronous scene loading with promise-based error handling
+  - Scroll-based rotation: Updates object `rotation.y = scrollProgress * Math.PI * 2`
+  - **Graceful Fallback**: Falls back to product images when Spline fails to load (e.g., in headless browsers)
+  - Proper cleanup: Disposes Spline Application on unmount to release GPU/context resources
+  - Loading states: Shows "Loading 3D Model..." message while scene loads
+  - **Test Status**: Passed - Spline loads successfully in browsers, graceful fallback in Playwright/headless
+  - **Production Ready**: Console logs confirm "Spline scene loaded successfully" in browser environments
   
-- **Previous Attempts**:
-  - **React Three Fiber** (October 27-28, 2025): Encountered `"Cannot read properties of undefined (reading 'replit')"` error during material instantiation - environment-specific R3F/Replit incompatibility
-  - **Spline 3D Viewer** (October 27, 2025): Failed with "Data read, but end of buffer not reached" errors when loading `.splinecode` URLs
+- **Previous Implementations**:
+  - **Vanilla Three.js** (October 28, 2025): PlainThreeTShirt component with manual WebGL setup - works but replaced by Spline
+  - **React Three Fiber** (October 27-28, 2025): Encountered `"Cannot read properties of undefined (reading 'replit')"` error - environment-specific incompatibility
+  - **Spline React Wrapper** (October 28, 2025): Had React hooks issues - resolved by using vanilla Runtime API
+  - **Early Spline Attempt** (October 27, 2025): Failed with "Data read, but end of buffer not reached" errors - resolved with new URL
   
 - **Current State**: 
-  - Premium T-Shirt uses PlainThreeTShirt with scroll-driven 3D rotation
+  - Premium T-Shirt displays professional Spline 3D model with scroll-driven rotation
   - Other products (hoodie, cap, tote) display product images as placeholders
   - WebGL unavailable environments (Playwright, headless) gracefully show fallback images
-  - 3D feature is production-ready with robust error handling
+  - 3D feature is production-ready with comprehensive error handling and resource cleanup
 
 **Scroll Progress Architecture**:
 - **Scalable Design**: Supports any number of products without hardcoding
