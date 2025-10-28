@@ -40,7 +40,6 @@ function TShirtMesh({ color = "#2F6BFF", rotation = 0 }: { color: string; rotati
           color={color} 
           metalness={0.1} 
           roughness={0.85}
-          side={THREE.DoubleSide}
         />
       </mesh>
 

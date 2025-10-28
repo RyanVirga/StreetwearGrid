@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import Product3DModel from "@/components/Product3DModel";
-import SplineModel from "@/components/SplineModel";
 import DiagonalStripedBackground from "@/components/DiagonalStripedBackground";
 import ScrollingMarquee from "@/components/ScrollingMarquee";
 import { MotionValue, useTransform, useMotionValue } from "framer-motion";
@@ -70,20 +69,12 @@ export default function ProductShowcase({
           
           <div className="relative z-10 w-full h-full flex items-center justify-center p-8 lg:p-16">
             <div className="w-full h-full max-w-md">
-              {splineUrl ? (
-                <SplineModel 
-                  sceneUrl={splineUrl}
-                  scrollProgress={currentProgress}
-                  fallbackImage={image}
-                />
-              ) : (
-                <Product3DModel 
-                  type={type} 
-                  color={modelColor}
-                  scrollProgress={currentProgress}
-                  fallbackImage={image}
-                />
-              )}
+              <Product3DModel 
+                type={type} 
+                color={modelColor}
+                scrollProgress={currentProgress}
+                fallbackImage={image}
+              />
             </div>
           </div>
           
