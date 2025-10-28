@@ -130,25 +130,25 @@ This design direction influences component structure, with reusable cards, badge
 - Optimized Canvas settings: disabled preserveDrawingBuffer and antialias, limited DPR for performance
 
 **3D Model Implementation (October 2025)**:
-- **Hybrid 3D Approach**:
-  - **Premium T-Shirt**: Uses Spline 3D viewer with custom scene (`https://prod.spline.design/untitled-ZfPPVu3CvwQ20F2vP0AcL0NO/scene.splinecode`)
-  - **Other Products**: Custom Three.js meshes with realistic geometry:
-    - Hoodie: Body, sleeves, hood with drawstrings, and kangaroo pocket
-    - Baseball Cap: Dome, curved brim, and top button
-    - Tote Bag: Rectangular body with gusset and handles
-- **Spline Integration** (Fixed October 27, 2025):
-  - `SplineModel` component wraps `<spline-viewer>` web component (v1.10.88)
-  - **Runtime Access**: Uses private `_spline` property (not public `spline` property)
-  - **Loading Strategy**: Polling mechanism (500ms intervals, 15 attempts max) to reliably capture runtime
-  - **Web Component Registration**: Uses `customElements.whenDefined()` before rendering
-  - **Scroll-Based Rotation**: Direct scene manipulation - `rotation.y = -scrollProgress * Math.PI * 2` (right-to-left)
-  - **Rotation Implementation**: Rotates both `scene.rotation.y` and `scene.children[0].rotation.y` for compatibility
-  - Calls `requestRender()` to ensure visual updates
-  - **Lazy Loading**: IntersectionObserver triggers rendering only when in viewport
-- **Scroll-Based Rotation**: Models rotate 360° based on scroll progress (0→1 per product)
-- **Lazy Loading**: IntersectionObserver delays rendering until product enters viewport
-- **WebGL Detection**: Early detection with graceful fallback to product images
-- **Performance Optimized**: Disabled preserveDrawingBuffer and antialias, limited DPR to 1.5
+- **TECHNICAL BLOCKER - React Three Fiber Incompatibility**:
+  - React Three Fiber (@react-three/fiber v8.17) encounters `"Cannot read properties of undefined (reading 'replit')"` error in Replit environment
+  - Error occurs during `meshStandardMaterial` instantiation in R3F's `applyProps` function
+  - Issue appears to be environment-specific incompatibility between R3F and Replit's configuration
+  - Attempted fixes: Removed THREE.DoubleSide, simplified materials, reinstalled packages - error persists on clean restart
+  - WebGL context repeatedly lost: `THREE.WebGLRenderer: Context Lost` errors occur immediately after R3F initialization
+  - **Current Approach**: ErrorBoundary catches errors and falls back to product images
+  - **Recommendation**: Consider alternative 3D approaches (CSS 3D transforms, plain Three.js without R3F, or external 3D hosting)
+  
+- **Previous Spline Attempt** (October 27-28, 2025):
+  - Attempted integration with Spline 3D viewer (`https://prod.spline.design/untitled-ZfPPVu3CvwQ20F2vP0AcL0NO/scene.splinecode`)
+  - Encountered "Data read, but end of buffer not reached" errors when loading `.splinecode` URLs
+  - Spline package and SplineModel component removed due to persistent loading failures
+  
+- **Current State**: 
+  - Custom Three.js mesh geometries defined for all products (t-shirt, hoodie, cap, tote)
+  - Components exist but cannot render due to R3F environment error
+  - ErrorBoundary fallback to product lifestyle images active
+  - 3D scroll-based rotation feature non-functional until R3F compatibility resolved
 
 **Scroll Progress Architecture**:
 - **Scalable Design**: Supports any number of products without hardcoding
