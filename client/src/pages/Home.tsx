@@ -26,7 +26,29 @@ export default function Home() {
 
   // Force scroll to top on mount to prevent initial downward scroll
   useEffect(() => {
+    // Save the previous scroll restoration setting
+    const previousScrollRestoration = window.history.scrollRestoration;
+    
+    // Disable browser's scroll restoration
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    
+    // Force scroll to top immediately
     window.scrollTo(0, 0);
+    
+    // Additional requestAnimationFrame to ensure it happens after any browser restoration
+    const rafId = requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+    });
+    
+    return () => {
+      cancelAnimationFrame(rafId);
+      // Restore previous scroll restoration setting on unmount
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = previousScrollRestoration;
+      }
+    };
   }, []);
 
   const showcaseProducts = [
