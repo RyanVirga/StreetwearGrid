@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import Product3DModel from "@/components/Product3DModel";
+import PlainThreeTShirt from "@/components/PlainThreeTShirt";
 import DiagonalStripedBackground from "@/components/DiagonalStripedBackground";
 import ScrollingMarquee from "@/components/ScrollingMarquee";
 import { MotionValue, useTransform, useMotionValue } from "framer-motion";
@@ -69,12 +69,21 @@ export default function ProductShowcase({
           
           <div className="relative z-10 w-full h-full flex items-center justify-center p-8 lg:p-16">
             <div className="w-full h-full max-w-md">
-              <Product3DModel 
-                type={type} 
-                color={modelColor}
-                scrollProgress={currentProgress}
-                fallbackImage={image}
-              />
+              {type === "tshirt" ? (
+                <PlainThreeTShirt 
+                  color={modelColor}
+                  scrollProgress={currentProgress}
+                  fallbackImage={image}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <img 
+                    src={image} 
+                    alt={name}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              )}
             </div>
           </div>
           
