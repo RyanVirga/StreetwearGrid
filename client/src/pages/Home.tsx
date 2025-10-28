@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import ProductCard from "@/components/ProductCard";
@@ -23,6 +23,11 @@ import toteImage from "@assets/generated_images/Beige_tote_bag_flat_lay_92c6a31f
 
 export default function Home() {
   const [activeFilters, setActiveFilters] = useState<Array<{ id: string; label: string; category: string }>>([]);
+
+  // Force scroll to top on mount to prevent initial downward scroll
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const showcaseProducts = [
     {
