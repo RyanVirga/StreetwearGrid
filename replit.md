@@ -161,6 +161,17 @@ This design direction influences component structure, with reusable cards, badge
 - **Segment Calculation**: Each product receives 0→1 progress for its portion of scroll (Product 0: 0-0.25, Product 1: 0.25-0.5, etc.)
 - **Rotation Mapping**: `rotation = scrollProgress * Math.PI * 2` (full 360° rotation per product)
 
+**Viewport Layout & Scroll Restoration** (October 28, 2025):
+- **Full Viewport Showcase**: HorizontalScrollSection sticky container uses `top-16 h-[calc(100vh-4rem)]` to fill viewport below navigation
+  - Accounts for Navigation bar's 64px (h-16) height
+  - Ensures no content cut-off on page load
+  - ProductShowcase uses `h-full` to inherit parent's calculated height
+- **Scroll Restoration**: Home page implements manual scroll restoration to prevent unwanted downward scrolling
+  - Sets `window.history.scrollRestoration = 'manual'` on mount
+  - Forces scroll to (0, 0) using `window.scrollTo()` and `requestAnimationFrame`
+  - Restores previous scrollRestoration setting on unmount to preserve browser behavior for other pages
+  - Prevents browser from remembering and restoring scroll position on page reload
+
 **Error Handling & Resilience**:
 - ErrorBoundary catches rendering errors with fallback UI
 - WebGL context loss recovery handlers
