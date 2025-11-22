@@ -81,66 +81,83 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { db } from "./db";
-import { users, merchRequests } from "@shared/schema";
-import { eq } from "drizzle-orm";
+// Conditionally import database only if DATABASE_URL is set
+let DbStorage: new () => IStorage;
+let storageInstance: IStorage;
 
-export class DbStorage implements IStorage {
-  async getUser(id: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id));
-    return result[0];
-  }
+if (process.env.DATABASE_URL) {
+  try {
+    const { db } = await import("./db");
+    const { users, merchRequests } = await import("@shared/schema");
+    const { eq } = await import("drizzle-orm");
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.username, username));
-    return result[0];
-  }
+    class DbStorageImpl implements IStorage {
+      async getUser(id: string): Promise<User | undefined> {
+        const result = await db.select().from(users).where(eq(users.id, id));
+        return result[0];
+      }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(insertUser).returning();
-    return result[0];
-  }
+      async getUserByUsername(username: string): Promise<User | undefined> {
+        const result = await db.select().from(users).where(eq(users.username, username));
+        return result[0];
+      }
 
-  async createMerchRequest(insertRequest: InsertMerchRequest): Promise<MerchRequest> {
-    const result = await db.insert(merchRequests).values({
-      zipCode: insertRequest.zipCode,
-      deadline: insertRequest.deadline,
-      budget: insertRequest.budget,
-      products: insertRequest.products as any,
-      colorways: insertRequest.colorways,
-      customColors: insertRequest.customColors as any,
-      printMethod: insertRequest.printMethod,
-      printLocations: insertRequest.printLocations,
-      files: insertRequest.files as any,
-      contactName: insertRequest.contactName,
-      contactEmail: insertRequest.contactEmail,
-      contactPhone: insertRequest.contactPhone,
-      company: insertRequest.company,
-      message: insertRequest.message,
-    }).returning();
-    return result[0];
-  }
+      async createUser(insertUser: InsertUser): Promise<User> {
+        const result = await db.insert(users).values(insertUser).returning();
+        return result[0];
+      }
 
-  async getMerchRequest(id: string): Promise<MerchRequest | undefined> {
-    const result = await db.select().from(merchRequests).where(eq(merchRequests.id, id));
-    return result[0];
-  }
+      async createMerchRequest(insertRequest: InsertMerchRequest): Promise<MerchRequest> {
+        const result = await db.insert(merchRequests).values({
+          zipCode: insertRequest.zipCode,
+          deadline: insertRequest.deadline,
+          budget: insertRequest.budget,
+          products: insertRequest.products as any,
+          colorways: insertRequest.colorways,
+          customColors: insertRequest.customColors as any,
+          printMethod: insertRequest.printMethod,
+          printLocations: insertRequest.printLocations,
+          files: insertRequest.files as any,
+          contactName: insertRequest.contactName,
+          contactEmail: insertRequest.contactEmail,
+          contactPhone: insertRequest.contactPhone,
+          company: insertRequest.company,
+          message: insertRequest.message,
+        }).returning();
+        return result[0];
+      }
 
-  async addFilesToRequest(id: string, files: Array<{ id: string; name: string; type: string; size: number; preview?: string }>): Promise<MerchRequest | undefined> {
-    const existing = await this.getMerchRequest(id);
-    if (!existing) return undefined;
-    
-    const currentFiles = existing.files || [];
-    const updatedFiles = [...currentFiles, ...files];
-    
-    const result = await db
-      .update(merchRequests)
-      .set({ files: updatedFiles as any })
-      .where(eq(merchRequests.id, id))
-      .returning();
-    
-    return result[0];
+      async getMerchRequest(id: string): Promise<MerchRequest | undefined> {
+        const result = await db.select().from(merchRequests).where(eq(merchRequests.id, id));
+        return result[0];
+      }
+
+      async addFilesToRequest(id: string, files: Array<{ id: string; name: string; type: string; size: number; preview?: string }>): Promise<MerchRequest | undefined> {
+        const existing = await this.getMerchRequest(id);
+        if (!existing) return undefined;
+        
+        const currentFiles = existing.files || [];
+        const updatedFiles = [...currentFiles, ...files];
+        
+        const result = await db
+          .update(merchRequests)
+          .set({ files: updatedFiles as any })
+          .where(eq(merchRequests.id, id))
+          .returning();
+        
+        return result[0];
+      }
+    }
+
+    DbStorage = DbStorageImpl;
+    storageInstance = new DbStorageImpl();
+  } catch (error) {
+    console.warn("Failed to initialize database storage, falling back to in-memory storage:", error);
+    storageInstance = new MemStorage();
   }
+} else {
+  console.log("DATABASE_URL not set, using in-memory storage");
+  storageInstance = new MemStorage();
 }
 
-export const storage = new DbStorage();
+export const storage = storageInstance;
