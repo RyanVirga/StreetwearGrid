@@ -10,11 +10,13 @@ export default function HorizontalScrollSection({ children }: HorizontalScrollSe
   const targetRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: targetRef,
-    offset: ["start start", "end start"]
+    offset: ["start start", "end end"]
   });
 
   const childCount = Children.count(children);
   const endTranslation = `${-(childCount - 1) * 100}%`;
+  // Add extra height to ensure we can scroll past the last section
+  const sectionHeight = `${(childCount * 100) + 50}vh`;
   
   const x = useTransform(scrollYProgress, [0, 1], ["0%", endTranslation]);
 
@@ -35,7 +37,7 @@ export default function HorizontalScrollSection({ children }: HorizontalScrollSe
   }, [children, scrollYProgress, childCount]);
 
   return (
-    <section ref={targetRef} className="relative h-[500vh]">
+    <section ref={targetRef} className="relative" style={{ height: sectionHeight }}>
       <ScrollProgressIndicator scrollProgress={scrollYProgress} />
       <div className="sticky top-16 h-[calc(100vh-4rem)] overflow-hidden">
         <motion.div
